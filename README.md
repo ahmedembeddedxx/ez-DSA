@@ -1,6 +1,6 @@
 # Welcome to the DSA Journey!
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ahmedembeddedx/Everything_but_DSA/blob/main/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/ahmedembeddedxx/ez-DSA/blob/main/LICENSE)
 
 ## Overview
 
@@ -19,12 +19,12 @@ Welcome to the Data Structures and Algorithms (DSA) Beginner to Professional rep
 
 1. Clone this repository to your local machine:
     ```bash
-    git clone https://github.com/your-username/DSA-Beginner-to-Professional.git
+    git clone https://github.com/ahmedembeddedxx/ez-DSA.git
     ```
 
 2. Navigate to the repository:
     ```bash
-    cd DSA-Beginner-to-Professional
+    cd ez-DSA
     ```
 
 3. Start exploring the content! The learning path is organized in a way that you can progress at your own pace.
