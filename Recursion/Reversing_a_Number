@@ -1,0 +1,19 @@
+#include <iostream>
+using namespace std;
+
+
+void reverse(int n)
+{
+	if (n == 0)
+		return;
+	cout << n % 10;
+	reverse(n / 10);
+}
+
+int main() {
+	cout << "---------------------------\n";
+	cout << "Reverse of 14539: ";
+	reverse(14539);
+	cout << endl;
+	cout << "---------------------------\n";
+}

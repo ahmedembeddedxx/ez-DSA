@@ -1,0 +1,84 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class MinHeap {
+private:
+    vector<int> heap;
+
+    void heapifyUp(int index) {
+        while (index > 0) {
+            int parentIndex = (index - 1) / 2;
+            if (heap[index] < heap[parentIndex]) {
+                swap(heap[index], heap[parentIndex]);
+                index = parentIndex;
+            } else {
+                break;
+            }
+        }
+    }
+
+    void heapifyDown(int index) {
+        while (true) {
+            int leftChildIndex = 2 * index + 1;
+            int rightChildIndex = 2 * index + 2;
+            int smallest = index;
+
+            if (leftChildIndex < heap.size() && heap[leftChildIndex] < heap[smallest]) {
+                smallest = leftChildIndex;
+            }
+
+            if (rightChildIndex < heap.size() && heap[rightChildIndex] < heap[smallest]) {
+                smallest = rightChildIndex;
+            }
+
+            if (smallest != index) {
+                swap(heap[index], heap[smallest]);
+                index = smallest;
+            } else {
+                break;
+            }
+        }
+    }
+
+public:
+    void insert(int value) {
+        heap.push_back(value);
+        heapifyUp(heap.size() - 1);
+    }
+	void deleteAtIndex(int index) {
+		if (index < 0 || index >= heap.size()) {
+			cout << "Invalid index." << endl;
+			return;
+		}
+
+		heap[index] = heap.back();
+		heap.pop_back();
+
+		heapifyDown(index);
+	}
+
+    void print() {
+        for (int value : heap) {
+            cout << value << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    MinHeap minHeap;
+
+    minHeap.insert(3);
+    minHeap.insert(1);
+    minHeap.insert(4);
+    minHeap.insert(1);
+    minHeap.insert(5);
+    minHeap.insert(9);
+    minHeap.insert(2);
+
+    cout << "Min Heap: ";
+    minHeap.print();
+
+    return 0;
+}

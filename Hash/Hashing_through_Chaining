@@ -1,0 +1,80 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+const int SIZE = 20;
+
+template<typename T>
+class HashValue
+{
+	T data;
+	int status;
+
+	HashValue()
+	{
+		data = -1;
+		status = 0;
+	}
+	friend class HashTable<T>;
+};
+
+template<typename T>
+class HashTable
+{
+	vector<list<HashValue<T>>> table;
+	int hashedposition(T data)
+	{ 
+		return data % SIZE; 
+	}
+public:
+	HashTable() : table(SIZE) {}
+	void insert(T data)
+	{
+		table[hashedposition(data)].push_back(data);
+	}
+	bool search(T data)
+	{
+		int listNo = hashedposition(data);
+		list<T>& iterator = table[listNo];
+
+		for (auto i : iterator)
+		{
+			if (i == data)
+				return true;
+		}
+		return false;
+	}
+	bool deletion(T data)
+	{
+		int listNo = hashedposition(data);
+		list<T>& iterator = table[listNo];
+
+		for (auto i : iterator)
+		{
+			if (i == data)
+			{
+				i = -1;
+				return true;
+			}
+		}
+		return false;
+	}
+};
+
+
+
+
+int main()
+{
+	HashTable<int> H1;
+	H1.insert(10);
+	H1.insert(20);
+	H1.insert(10);
+
+}

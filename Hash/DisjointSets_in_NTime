@@ -1,0 +1,89 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+class Hash
+{
+	int data;
+	int status; //0-->Free, 1-->Occupied 
+public:
+	Hash()
+	{
+		data = 0;
+		status = 0;
+	}
+	friend class HashTable;
+};
+
+class HashTable
+{
+	int size = 15;
+	Hash arr[15];
+public:
+	int insert(int data)
+	{
+		int hashed_data = data % 15;
+		int was_same = 0;
+		
+		while (arr[hashed_data].status == 1)
+		{
+			if (data == arr[hashed_data].data)
+				was_same = 1;
+			hashed_data++;
+		}
+		arr[hashed_data].data = data;
+		arr[hashed_data].status = 1;
+		return was_same;
+	}
+};
+
+bool isDisjoint(int* set1, int* set2, int size1, int size2, int& CommonElement)
+{
+	HashTable H;
+	for (int i = 0; i < size1; i++)
+		H.insert(set1[i]);
+
+	for (int i = 0; i < size2; i++)
+	{
+		if (H.insert(set2[i]) == 1)
+		{
+			CommonElement = set2[i];
+			return true;
+		}
+	}
+	CommonElement = -1;
+	return false;
+
+
+}
+
+
+int main()
+{
+	int set1[] = { 12, 34, 11, 9, 3 };
+	int set2[] = { 7, 2, 1, 5 };
+	int set3[] = { 2, 1, 3, 5 };
+	
+	int k = -1;
+
+	if (isDisjoint(set1, set2, 5, 4, k))
+		cout << "Set 1 & Set 2 are not disjoint, "<<k<<" is in both sets\n";
+
+	else
+		cout << "Set 1 & Set 2 are disjoint\n";
+
+	if (isDisjoint(set1, set3, 5, 4, k))
+		cout << "Set 1 & Set 3 are not disjoint, '" << k << "' is in both sets\n";
+
+	else
+		cout << "Set 1 & Set 3 are disjoint\n";
+
+
+
+}

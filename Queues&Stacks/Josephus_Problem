@@ -1,0 +1,37 @@
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+
+int JosephusProblem(int M, int N)
+{
+	queue<int>q;
+	for(int i=1; i<=N; i++)
+		q.push(i);
+	for(int j=0; j<N; j++)
+	{
+		for(int i=0; i<M; i++)
+		{
+			int x=q.front();
+			q.pop();
+			q.push(x);
+		}
+		if (j<N-1 )
+			 q.pop();
+	}
+	return q.front();
+}
+
+
+int main() {
+	
+	cout<<JosephusProblem(0, 5)<<endl;
+	cout<<JosephusProblem(1, 5)<<endl;
+	cout<<JosephusProblem(2, 5)<<endl;
+
+
+}

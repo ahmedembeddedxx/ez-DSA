@@ -1,0 +1,75 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+template <typename T>
+class Hash {
+	T data;
+	int status;
+	Hash()
+	{
+		this->data = 0;
+		status = 0;
+	}
+	friend class HasTable;
+};
+
+template <typename T>
+class HashTable
+{
+	Hash<T> arr;
+	int capacity;
+public:
+	HashTable(int size)
+	{
+		capacity = size;
+		arr = new T[capacity];
+	}
+	int parser(int data)
+	{
+		return data % capacity;
+	}
+	int parser(string data)
+	{
+		int sum = 0;
+		for (auto i : data)
+			sum += i;
+		sum %= capacity;
+		return sum;
+	}
+	int parser(T data)
+	{
+
+		return 0;
+	}
+	void insert(T data)
+	{
+		int sum = parser(data);
+
+		while (arr[sum].status == 1)
+		{
+			sum++;
+			sum %= capacity;
+		}
+		arr[sum].data = data;
+		arr[sum].status = 1;
+	}
+
+	int size()
+	{
+		return capacity;
+	}
+};
+
+
+
+int main()
+{
+
+}

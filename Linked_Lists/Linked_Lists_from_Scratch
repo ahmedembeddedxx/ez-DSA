@@ -1,0 +1,269 @@
+#include <iostream>
+using namespace std;
+
+template <class T>
+class Node;
+template <class T>
+class DoublyLinkList;
+
+template <class T>
+class Node
+{
+	friend class DoublyLinkList<T>;
+	Node<T>* next;
+	Node<T>* prev;
+	T data;
+public:
+	Node(T data)
+	{
+		next = NULL;
+		prev = NULL;
+		this->data = data;
+	}
+};
+
+
+template <class T>
+class DoublyLinkList
+{
+	Node<T>* head;
+	Node<T>* tail;
+public:
+	DoublyLinkList()
+	{
+		head = NULL;
+		tail = NULL;
+	}
+	void insertAtStart(T const element)
+	{
+		Node<T>* newNode = new Node<T>(element);
+
+		if (head == NULL)
+		{
+			head = newNode;
+			tail = newNode;
+		}
+		else
+		{
+			newNode->next = head;
+			head->prev = newNode;
+			head = newNode;
+		}
+	}
+	void printForward() const
+	{
+		Node<T>* curr = head;
+		while (curr != NULL)
+		{
+			cout << curr->data << "<->";
+			curr = curr->next;
+		}
+		cout << "NULL" << endl;
+	}
+	void deleteFromStart()
+	{
+		if (head == NULL)
+			return;
+		if (head == tail)
+		{
+			delete head;
+			head = tail = NULL;
+			return;
+		}
+		Node<T>* curr = head;
+		head = curr->next;
+		head->prev = NULL;
+		delete curr;
+		curr = NULL;
+	}
+
+	void deleteFromEnd()
+	{
+		if (head == tail)
+			return;
+		else
+		{
+
+			Node<T>* temp = tail;
+			tail = temp->prev;
+			tail->next->prev = NULL;
+			tail->next = NULL;
+			delete temp;
+		}
+	}
+	int size() const
+	{
+		Node<T>* curr = head;
+		int ctr = 0;
+		while (curr != NULL)
+		{
+			ctr++;
+			curr = curr->next;
+		}
+		return ctr;
+	}
+	T ReturnMiddle() const
+	{
+		Node<T>* start = head;
+		Node<T>* end = tail;
+
+		while (start != end && start != end->prev)
+		{
+			start = start->next;
+			end = end->prev;
+		}
+		return start->data;
+	}
+	bool IsEmpty()
+	{
+		return (head == NULL);
+	}
+	void insertAfter(T val, T key)
+	{
+		if (head == NULL)
+		{
+			this->insertAtStart(val);
+			return;
+		}
+		Node<T>* n = new Node<T>(val);
+		Node<T>* curr = head;
+		while (curr != NULL)
+		{
+			if (curr->data == key || curr->next == NULL)
+			{
+				if (curr->next == NULL)
+					tail = n;
+				Node<T>* temp = curr->next;
+				if (temp != NULL) {
+					temp->prev = n;
+				}
+				n->next = temp;
+				curr->next = n;
+				n->prev = curr;
+				return;
+			}
+			curr = curr->next;
+		}
+	}
+	void insertBefore(T val, T key)
+	{
+		if (head == NULL)
+		{
+			this->insertAtStart(val);
+			return;
+		}
+		Node<T>* n = new Node<T>(val);
+		Node<T>* curr = head;
+		if (head->data == key)
+		{
+			n->next = head;
+			head->prev = n;
+			head = n;
+			return;
+		}
+		while (curr->next != NULL)
+		{
+			if (curr->next->data == key)
+			{
+				Node<T>* temp = curr->next;
+				temp->prev = n;
+				n->next = temp;
+				curr->next = n;
+				n->prev = curr;
+				return;
+			}
+			curr = curr->next;
+		}
+		curr->next = n;
+		n->prev = curr;
+		n->next = NULL;
+		tail = n;  // Update tail to point to the new last node
+	}
+	void swap(int posA, int posB)
+	{
+		if (posA == posB)
+			return;
+
+		Node<T>* nodeA = nullptr;
+		Node<T>* nodeB = nullptr;
+		Node<T>* curr = head;
+		int i = 0;
+
+		while (curr != nullptr)
+		{
+			if (posA == i)
+				nodeA = curr;
+			if (posB == i)
+				nodeB = curr;
+			i++;
+			curr = curr->next;
+		}
+
+		if (!nodeA || !nodeB)
+			return;
+
+		Node<T>* tempNext = nodeA->next;
+		nodeA->next = nodeB->next;
+		nodeB->next = tempNext;
+
+		Node<T>* tempPrev = nodeA->prev;
+		nodeA->prev = nodeB->prev;
+		nodeB->prev = tempPrev;
+		if (nodeA->prev == nullptr)
+			head = nodeA;
+		else
+			nodeA->prev->next = nodeA;
+
+		if (nodeB->prev == nullptr)
+			head = nodeB;
+		else
+			nodeB->prev->next = nodeB;
+
+		if (nodeA->next == nullptr)
+			tail = nodeA;
+		else
+			nodeA->next->prev = nodeA;
+
+		if (nodeB->next == nullptr)
+			tail = nodeB;
+		else
+			nodeB->next->prev = nodeB;
+	}
+
+
+	~DoublyLinkList()
+	{
+		//No Explicit Definition Required//
+	}
+
+};
+
+
+
+int main() {
+
+	DoublyLinkList<int> list;
+	list.insertAtStart(6);
+	list.insertAtStart(5);
+	list.insertAtStart(3);
+	list.printForward();
+	list.insertAfter(7, 6);
+	list.printForward();
+	cout << list.size() << endl;
+	cout << list.ReturnMiddle() << endl;
+	if (!list.IsEmpty())
+		cout << "List is not Empty\n";
+	list.insertBefore(3, 1);
+	list.printForward();
+	list.deleteFromStart();
+	list.deleteFromEnd();
+	list.printForward();
+	list.deleteFromStart();
+	list.deleteFromStart();
+	list.deleteFromStart();
+	list.printForward();
+
+	system("Pause");
+	return 0;
+}
+

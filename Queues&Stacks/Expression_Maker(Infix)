@@ -1,0 +1,67 @@
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+
+void PrefixToPostfix(string prefix) {
+  stack<string> s;
+  for (int i = prefix.length() - 1; i >= 0; i--) {
+    if (prefix[i] == '*' || prefix[i] == '/' || prefix[i] == '+' || prefix[i] == '-') {
+      string A = s.top();
+      s.pop();
+      string B = s.top();
+      s.pop();
+
+      string expression = A + B + prefix[i];
+      s.push(expression);
+    } else {
+      s.push(string(1, prefix[i]));
+    }
+  }
+
+  cout << s.top() << endl;
+}
+
+void evaluate_postfix(string postfix)
+{
+	stack<int> s;
+	for(int i=0; i<postfix.length(); i++)
+	{
+		if(postfix[i]!='*' && postfix[i]!='/' && postfix[i]!='+' && postfix[i]!='-')
+		{
+			s.push(postfix[i]-48);
+		}
+		else
+		{
+			int A=s.top();
+			s.pop();
+			int B=s.top();
+			s.pop();
+			if(postfix[i]=='+')
+				s.push(A+B);
+			if(postfix[i]=='-')
+				s.push(A-B);
+			if(postfix[i]=='/')
+				s.push(A/B);
+			if(postfix[i]=='*')
+				s.push(A*B);
+		}
+	}
+	cout<<s.top()<<endl;
+	s.pop();
+}
+
+
+
+int main() {
+	PrefixToPostfix("*+AB-CD");
+	
+	
+	evaluate_postfix("234*+");
+
+}
+Q1.cpp

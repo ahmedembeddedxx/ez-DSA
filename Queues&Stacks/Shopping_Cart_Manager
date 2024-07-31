@@ -1,0 +1,93 @@
+#include <iostream>
+#include <string>
+#include <stack>
+using namespace std;
+
+
+class Item
+{
+public:
+	string name;
+	double price;
+	Item(string name, double price)
+	{
+		this->name=name;
+		this->price=price;
+	}
+	
+	bool operator==(Item& other)
+	{
+		return (other.name==this->name && other.price==this->price);
+	}
+	double get_price()
+	{
+		return price;
+	}
+};
+
+class ShoppingCart
+{
+	stack<Item> cart;
+	
+public:
+	void add_item(Item I)	
+	{
+		cart.push(I);
+	}
+	void remove_item(Item I)
+	{
+		stack<Item> temp;
+		
+		while(!cart.empty())
+		{
+			Item curr(cart.top().name, cart.top().price);			
+			if(!(curr == I))
+				temp.push(curr);
+			
+			cart.pop();
+		}
+		while(!temp.empty())
+		{
+			cart.push(temp.top());
+			temp.pop();
+		}		
+	}
+	
+	void calculate_total()
+	{
+		stack<Item> temp;
+		double sum=0;
+		while(!cart.empty())
+		{
+			Item curr(cart.top().name, cart.top().price);
+			sum+=curr.get_price();
+			temp.push(curr);
+			cart.pop();
+		}
+		while(!temp.empty())
+		{
+			cart.push(temp.top());
+			temp.pop();
+		}	
+		
+		cout<<sum<<endl;		
+	}
+	
+	
+	
+};
+
+
+int main() {
+
+	Item item1("Laptop", 1000);
+	Item item2("Headphones", 250);
+	
+	ShoppingCart cart;
+	cart.add_item(item1);
+	cart.add_item(item2);
+	cart.calculate_total(); // Output should be 1250
+	cart.remove_item(item2);
+	cart.calculate_total(); // Output should be 1000
+}
+

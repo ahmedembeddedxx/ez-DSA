@@ -1,0 +1,219 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+using namespace std;
+
+class Graph
+{
+	int V;
+	int** adj;
+	bool isDirected;
+
+public:
+	Graph(int n)
+	{
+		if (n > 1)
+			V = n;
+		else
+			V = 2;
+		isDirected = false;
+		adj = new int* [V];
+		for (int i = 0; i < V; i++)
+			adj[i] = new int[V];
+
+		for (int i = 0; i < V; i++)
+			for (int j = 0; j < V; j++)
+				adj[i][j] = 0;
+
+		cout << "Graph with " << V << " nodes declared\n";
+
+	}
+	void TakeInput(int v, int w)
+	{
+		if ((v >= V || w >= V || v < 0 || w < 0) || (v == w))
+		{
+			cout << "Connection cannot be made b/w " << v << " and " << w << ".\n";
+			return;
+		}
+		adj[v][w] = adj[w][v] = 1;
+		cout << "Edge has beeen made b/w " << v << " and " << w << ".\n";
+	}
+	void BFS(int start = 0)
+	{
+		cout << "\nTraversal through BFS\n";
+		bool* visited = new bool[V];
+		for (int i = 0; i < V; i++)
+			visited[i] = false;
+
+		queue<int> q;
+		q.push(start);
+		visited[start] = true;
+
+		while (!q.empty())
+		{
+			int x = q.front();
+			if (visited[x] == false)
+				visited[x] = true;
+			for (int i = 0; i < V; i++)
+				if (adj[x][i] && !visited[i])
+					q.push(i);
+			cout << x << ' ';
+			q.pop();
+		}
+		cout << endl;
+		cout << "Isolated Nodes\n";
+		for (size_t i = 0; i < V; i++)
+			if (!visited[i])
+				cout << i << ' ';
+
+		cout << endl << endl;
+
+	}
+	void DFS(int start = 0)
+	{
+		cout << "\nTraversal through DFS\n";
+		bool* visited = new bool[V];
+		for (int i = 0; i < V; i++)
+			visited[i] = false;
+
+		stack<int> s;
+		s.push(start);
+
+		while (!s.empty())
+		{
+			int x = s.top();
+			s.pop();
+			if (visited[x] == false)
+				visited[x] = true;
+			for (int i = 0; i < V; i++)
+				if (adj[x][i] && !visited[i])
+					s.push(i);
+			cout << x << ' ';
+		}
+		cout << endl;
+		cout << "Isolated Nodes\n";
+		for (size_t i = 0; i < V; i++)
+			if (!visited[i])
+				cout << i << ' ';
+
+		cout << endl << endl;
+
+	}
+	bool* is_connected(int start = 0)
+	{
+		bool* visited = new bool[V];
+		for (int i = 0; i < V; i++)
+			visited[i] = false;
+
+		queue<int> q;
+		q.push(start);
+		visited[start] = true;
+
+		while (!q.empty())
+		{
+			int x = q.front();
+			if (visited[x] == false)
+				visited[x] = true;
+			for (int i = 0; i < V; i++)
+				if (adj[x][i] && !visited[i])
+					q.push(i);
+			q.pop();
+		}
+		for (size_t i = 0; i < V; i++)
+			if (!visited[i])
+			{
+				cout << "\nThe Graph is not connected by nodes\n";
+				return visited;
+			}
+
+		for (int i = 0; i < V; i++)
+			visited[i] = false;
+		stack<int> s;
+		s.push(start);
+
+		while (!s.empty())
+		{
+			int x = s.top();
+			s.pop();
+			if (visited[x] == false)
+				visited[x] = true;
+			for (int i = 0; i < V; i++)
+				if (adj[x][i] && !visited[i])
+					s.push(i);
+			cout << x << ' ';
+		}
+		for (size_t i = 0; i < V; i++)
+			if (!visited[i])
+			{
+				cout << "\nThe Graph is not connected by nodes\n";
+				return visited;
+			}
+
+
+		cout << "\nThe Graph is connected by nodes, no node is isolated\n";
+		return visited;
+	}
+	bool is_SC()
+	{
+		for (int i = 0; i < V; i++)
+			for (int j = 0; j < V; j++)
+				if (i != j && adj[i][j] == 0)
+				{
+					cout << "\nGraph is not strongly connected\n";
+					return false;
+				}
+		cout << "\nGraph is strongly connected\n";
+		return true;
+	}
+	bool isReachable(int u, int v)
+	{
+		if (u >= V || v >= V || u < 0 || v < 0)
+			return false;
+		if (u == v)
+			return true;
+		bool* visited = this->is_connected(u);
+
+		if (visited[u]==false || visited[v] == false)
+		{
+			cout << "\nThere is not any path between " << u << " and " << v << "\n";
+			return false;
+		}
+
+		cout << "\nThere is a path between " << u << " and " << v << "\n";
+		return true;
+	}
+	bool isCyclic()
+	{
+		for (size_t i = 0; i < V; i++)
+			for (size_t j = 0; j < V; j++)
+				for (size_t k = 0; k < V; k++)
+					if (adj[i][j] == 1 && adj[j][k] == 1 && adj[k][i] == 1)
+					{
+						cout << "There exist a 3-n Cycle in graph\n";
+						return true;
+					}
+		cout << "There is no Cycle in graph\n";
+		return false;
+	}
+
+};
+
+int main()
+{
+	Graph G(5);
+	G.TakeInput(1, 2);
+	G.TakeInput(2, 3);
+	G.TakeInput(4, 5);
+	G.TakeInput(0, 2);
+
+
+
+	G.BFS();
+	G.DFS();
+
+	G.isReachable(0, 2);
+	G.is_SC();
+	G.isCyclic();
+}

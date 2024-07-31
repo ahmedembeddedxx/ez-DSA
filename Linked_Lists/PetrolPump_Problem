@@ -1,0 +1,117 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+class PetrolPump
+{
+	int capcity;
+	int next_pump;
+	PetrolPump* next;
+	friend class CircularLL;
+	PetrolPump(int capacity = 1, int next_pump = 1)
+	{
+		this->capcity = capacity;
+		this->next_pump = next_pump;
+		next = nullptr;
+
+	}
+};
+class CircularLL
+{
+	PetrolPump* head;
+public:
+	CircularLL()
+	{
+		head = nullptr;
+	}
+	void insert(int capacity, int next_pump)
+	{
+		if (head == nullptr)
+		{
+			head = new PetrolPump(capacity, next_pump);
+			head->next = head;
+			return;
+		}
+		PetrolPump* curr = head;
+		while (curr->next != head)
+		{
+			curr = curr->next;
+		}
+		curr->next = new PetrolPump(capacity, next_pump);
+		curr->next->next = head;
+	}
+	void print()
+	{
+		if (head == nullptr)
+			return;
+		PetrolPump* curr = head;
+		while (curr->next != head)
+		{
+			cout << curr->capcity << ' ' << curr->next_pump << endl;
+			curr = curr->next;
+		}
+		cout << curr->capcity << ' ' << curr->next_pump << endl;
+	}
+	int CompleteTour()
+	{
+		if (head == nullptr)
+			return -1;
+		PetrolPump* curr = head;
+		int i = 0;
+		while (curr->next != head)
+		{
+			if (curr->capcity - curr->next_pump > 0)
+				return i;
+			curr = curr->next;
+			i++;
+		}
+		if (curr->capcity - curr->next_pump > 0)
+			return i;
+		else
+			return -1;
+	}
+	void read_csv()
+	{
+		ifstream fin("data.txt");
+
+		string line1;
+		string line2;
+
+		getline(fin, line1);
+		getline(fin, line2);
+
+		string num1 = "", num2 = "";
+		for (int i = 0; i < line1.size(); i++)
+		{
+			if (line1[i] != ',')
+			{
+				num1 += line1[i];
+				num2 += line2[i];
+			}
+			else
+			{
+				this->insert(stoi(num1), stoi(num2));
+				num1 = "";
+				num2 = "";
+			}
+		}
+
+		fin.close();
+
+	}
+};
+
+int main()
+{
+	CircularLL C;
+	C.read_csv();
+
+	cout << "Start: " << C.CompleteTour() << endl;
+}

@@ -1,0 +1,39 @@
+#include <iostream>
+#include <stack>
+#include <string>
+#include <cstring>
+#include <queue>
+#include <list>
+#include <vector>
+using namespace std;
+
+int celebrity(int arr[][4], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		int flag = 0;
+		for (int j = 0; j < size; j++)
+		{
+			if (i == j)
+				continue;
+			if (arr[i][j] == 1)
+				continue;
+			if (arr[j][i] == 0)
+				continue;
+			flag++;
+		}
+		if (flag == size - 1)
+			return i;
+	}
+	return -1;
+}
+
+
+
+int main() 
+{
+	int arr[4][4] = {{0, 0, 1, 0}, {0, 0, 1, 0}, {0, 0, 0, 0}, {0, 0, 1, 0}};
+
+	cout << celebrity(arr, 4);
+
+}

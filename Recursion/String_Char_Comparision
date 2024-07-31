@@ -1,0 +1,45 @@
+#include <iostream>
+using namespace std;
+bool compareTwoArrays(char* arr1, char* arr2)
+{
+	if (*arr1 == '\0' && *arr2 == '\0')
+		return true;
+	else if (*arr1 != *arr2)
+		return false;
+	else
+		return compareTwoArrays(arr1 + 1, arr2 + 1);
+}
+
+bool compareTwoStrings(string str1, string str2, int index = 0)
+{
+	if (index >= str1.length() && index >= str2.length())
+		return true;
+	if (index >= str1.length() || index >= str2.length() || str1[index] != str2[index])
+		return false;
+	return compareTwoStrings(str1, str2, index + 1);
+}
+
+int main()
+{
+	char arr1[] = "Babar";
+	char arr2[] = "Azam";
+	cout << arr1 << endl << arr2 << endl;
+	if (compareTwoArrays(arr1, arr2))
+		cout << "The arrays are equal." << endl;
+	else
+		cout << "The arrays are not equal." << endl;
+	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+
+	string str1 = "Hello";
+	string str2 = "Hello";
+
+	cout << str1 << endl << str2 << endl;
+	if (compareTwoStrings(str1, str2))
+		cout << "The strings are equal." << endl;
+	else
+		cout << "The strings are not equal." << endl;
+	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+
+}

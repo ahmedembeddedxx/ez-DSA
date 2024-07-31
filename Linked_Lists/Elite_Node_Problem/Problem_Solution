@@ -1,0 +1,190 @@
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <vector>
+
+using namespace std;
+
+class Node
+{
+	friend class Maze;
+	int data;
+	Node* up;
+	Node* down;
+	Node* left;
+	Node* right;
+	Node(int data = 0)
+	{
+		this->data = data;
+		up = down = left = right = nullptr;
+	}
+};
+
+class Maze
+{
+	Node* head;
+	int row, col;
+	int Visited(Node* current)
+	{
+		static vector<Node* > isVisited;
+
+		for (int i = 0; i < isVisited.size(); i++)
+		{
+			if (current == isVisited[i])
+				return 1;
+		}
+		isVisited.push_back(current);
+		cout << current->data << "->";
+		int clue = current->data;
+		if (current == FindNode(ClueRow(clue), ClueColumn(clue)))
+			return -1;
+		else
+			return 0;
+	}
+	int ClueRow(int data)
+	{
+		int sum = 0;
+		while (data != 0)
+		{
+			sum += (data % 10);
+			data /= 10;
+		}
+		return (sum % (row - 1) + 1);
+	}
+	int ClueColumn(int data)
+	{
+		int sum = 0;
+		while (data != 0)
+		{
+			sum++;
+			data /= 10;
+		}
+		return sum;
+	}
+	Node* FindNode(int r, int c)
+	{
+		Node* currentNode = head;
+		if (r > row || c > col)
+			return new Node(-2);
+		for (int i = 1; i < r; i++)
+			currentNode = currentNode->down;
+		for (int j = 1; j < c; j++)
+			currentNode = currentNode->right;
+		return currentNode;
+	}
+public:
+	void Print(Node* h = nullptr)
+	{
+		if (h == nullptr)
+			h = head;
+		Node* currentRow = h;
+		cout << "Maze: \n";
+		while (currentRow != nullptr)
+		{
+			Node* currentNode = currentRow;
+			while (currentNode != nullptr)
+			{
+				cout << currentNode->data << "\t";
+				currentNode = currentNode->right;
+			}
+			cout << endl;
+			currentRow = currentRow->down;
+		}
+	}
+	Maze()
+	{
+		head = nullptr;
+		row = col = 0;
+	}
+	void Read(string filename)
+	{
+		ifstream fin(filename);
+		string line;
+
+		if (fin.is_open())
+		{
+			row = 1;
+			while (getline(fin, line))
+			{
+				stringstream ss(line);
+				string value;
+				col = 1;
+
+				while (getline(ss, value, ','))
+				{
+					int clue = 0;
+					if (!value.empty())
+					{
+						try
+						{
+							clue = stoi(value);
+						}
+						catch (const exception&)
+						{
+							clue = 0;
+						}
+					}
+					Node* newNode = new Node(clue);
+					if (row > 1)
+					{
+						Node* upNode = FindNode(row - 1, col);
+						newNode->up = upNode;
+						upNode->down = newNode;
+					}
+					if (col > 1)
+					{
+						Node* leftNode = FindNode(row, col - 1);
+						newNode->left = leftNode;
+						leftNode->right = newNode;
+					}
+					if (row == 1 && col == 1)
+						head = newNode;
+					col++;
+				}
+				row++;
+			}
+			fin.close();
+		}
+		else
+			cout << "Unable to open file." << endl;
+	}
+	void EliteNode(Node* elite = nullptr)
+	{
+		Node* curr = head;
+		int isFound = 0;
+
+		while (curr != nullptr)
+		{
+			isFound = this->Visited(curr);
+
+			if (isFound == -1 || isFound == 1 || isFound == -2)
+				break;
+
+			int clue = curr->data;
+			int nextRow = ClueRow(clue);
+			int nextCol = ClueColumn(clue);
+
+			curr = FindNode(nextRow, nextCol);
+		}
+		if (isFound == -1)
+			cout << "\nElite Node has been found at (" << curr->data << ")" << endl;
+		else if (isFound == 1)
+			cout << "\nMaze is Forming a Loop" << endl;
+		else if (isFound == -2)
+			cout << "\nElite Node is not found" << endl;
+	}
+};
+
+int main()
+{
+	Maze M;
+	string filename;
+	cout << "Enter Filename(.csv, .xlsx, .txt): ";
+	cin >> filename;
+	M.Read(filename);
+	M.Print();
+	M.EliteNode();
+
+}

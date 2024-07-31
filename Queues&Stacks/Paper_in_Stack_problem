@@ -1,0 +1,232 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <vector>
+#include <stack>
+#include <queue>
+#include <fstream>
+#include <conio.h>
+#include <algorithm>
+#include <windows.h>
+using namespace std;
+
+HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+class PaperDetail
+{
+	string name;
+	int roll;
+public:
+	PaperDetail(int roll, string name)
+	{
+		this->name = name;
+		this->roll = roll;
+	}
+	string getname()
+	{
+		return name;
+	}
+	int getroll()
+	{
+		return roll;
+	}
+	bool operator<(const PaperDetail& other) const
+	{
+		return roll < other.roll;
+	}
+};
+
+class PaperManager
+{
+	vector<PaperDetail> papers;
+	queue<PaperDetail> wait;
+	stack<PaperDetail> submittedsheets;
+	stack<PaperDetail> unsubmittedsheets;
+	queue<PaperDetail> markedsheets;
+	int count;
+	int wait_count;
+	int sub_count;
+	int unsub_count;
+	int mark_count;
+	void show()
+	{
+		sort(papers.begin(), papers.end());
+		cout << "Seating Plan\n\n";
+		cout << "Seat#\tRoll#\tName\n\n";
+		for (int i = 0; i < papers.size(); i++)
+			cout << i + 1 << "\t" << papers[i].getroll() << "\t" << papers[i].getname() << endl;
+		system("pause");
+		system("cls");
+		cout << "All Submissions Report\n\n";
+		cout << "#  Submitted\t\tIn Wait\t\tSubmitted After John\n\n";
+		int i = 1;
+		while (!submittedsheets.empty() || !wait.empty() || !unsubmittedsheets.empty())
+		{
+			cout << i++ << "  ";
+			if (!submittedsheets.empty())
+			{
+				cout << submittedsheets.top().getname() << " ";
+				submittedsheets.pop();
+			}
+			if (!wait.empty())
+			{
+				cout << wait.front().getname();
+				wait.pop();
+			}
+			else
+				cout << "\t\t    ";
+			if (!unsubmittedsheets.empty())
+			{
+				cout << unsubmittedsheets.top().getname();
+				unsubmittedsheets.pop();
+			}
+			cout << endl;
+		}
+	}
+	void read_csv(string filename)
+	{
+		ifstream file(filename);
+		if (!file.is_open())
+		{
+			cout << "Exception Thrown: File Unable to Open\n";
+			return;
+		}
+		string line;
+		while (getline(file, line))
+		{
+			int commaPos = line.find(',');
+			if (commaPos == string::npos)
+				throw "Exception";
+			try {
+				int roll = stoi(line.substr(0, commaPos));
+				string name = line.substr(commaPos + 1);
+
+				if (name.length() < 20)
+					name.resize(20, ' ');
+				else if (name.length() > 20)
+					name = name.substr(0, 20);
+				if (name.empty())
+					throw "Exception";
+				if (roll == 420)
+					continue;
+				PaperDetail P1(roll, name);
+				papers.push_back(P1);
+			}
+			catch (...) {
+				cout << "Exception Thrown: Handled (Entry Dropped)\n";
+				continue;
+			}
+		}
+		papers.push_back(PaperDetail(420, "John\t\t    "));
+
+
+		file.close();
+	}
+	void print_report()
+	{
+		cout << "\n****Report****\n";
+		cout << "In Total " << count << " students had given exam (Paper Vector).\n";
+		cout << "John submmitted Exam after " << sub_count + wait_count << " students (Submission Stack).\n";
+		cout << "John waited for " << wait_count << " students (Wait Queue).\n";
+		cout << "John exam was placed on " << sub_count + wait_count + 1 << "th position from bottom (Submission Stack).\n";
+		cout << "John exam was marked on " << unsub_count + 1 << "th number (Complete Stack).\n";
+		cout << "John marked exam was placed on " << sub_count + wait_count + 1 << "th position (Marked Stack).\n";
+		cout << "John recieved after " << ceil(count * 0.37) << " students (Result Queue).\n";
+		cout << "John traversed maximum through " << count - ceil(count * 0.37) << " papers.\n";
+		cout << "John traversed minimum through " << sub_count + wait_count - ceil(count * 0.37) << " papers.\n";
+		cout << "Memory Usage:\n1 Vector\n4 Stacks\n3 Queues\n";
+
+	}
+public:
+	PaperManager(string filename)
+	{
+		this->read_csv(filename);
+	}
+	void process()
+	{
+		count = papers.size();
+		wait_count = (count * 3.0 / 100);
+		sub_count = (count * 69.0 / 100);
+		unsub_count = (count - wait_count - sub_count);
+		mark_count = count;
+
+		for (int i = 0; i < count; i++)
+		{
+			if (papers[i].getroll() == 420)
+				continue;
+			else if (i < sub_count)
+				submittedsheets.push(papers[i]);
+			else if (i < (wait_count + sub_count))
+				wait.push(papers[i]);
+			else
+				unsubmittedsheets.push(papers[i]);
+		}
+		wait.push(PaperDetail(420, "John\t\t    "));
+
+		queue<PaperDetail> waitCopy = wait;
+		stack<PaperDetail> unsubmittedCopy = unsubmittedsheets;
+		stack<PaperDetail> submittedCopy = submittedsheets;
+		this->show();
+		system("pause");
+		int k = 1;
+		while (!submittedCopy.empty())
+		{
+			markedsheets.push(submittedCopy.top());
+			submittedCopy.pop();
+		}
+		while (!waitCopy.empty())
+		{
+			markedsheets.push(waitCopy.front());
+			waitCopy.pop();
+		}
+		while (!unsubmittedCopy.empty())
+		{
+			markedsheets.push(unsubmittedCopy.top());
+			unsubmittedCopy.pop();
+		}
+
+		waitCopy = markedsheets;
+
+		while (!waitCopy.empty()) {
+			submittedCopy.push(waitCopy.front());
+			waitCopy.pop();
+		}
+		int i = 1;
+		system("cls");
+		cout << "Combined Submission Stack\n\n";
+		cout << "#\tName\n\n";
+		while (!submittedCopy.empty())
+		{
+			if (submittedCopy.top().getroll() == 420)
+				SetConsoleTextAttribute(h, 10);
+			cout << i++ << "\t";
+			cout << submittedCopy.top().getname() << endl;
+			SetConsoleTextAttribute(h, 7);
+			submittedCopy.pop();
+		}
+		system("pause");
+		system("cls");
+		cout << "Checked Papers Stack\n\n";
+		cout << "#\tName\n\n";
+		i = 1;
+		while (!markedsheets.empty())
+		{
+			if (markedsheets.front().getroll() == 420)
+				SetConsoleTextAttribute(h, 10);
+			cout << i++ << "\t";
+			cout << markedsheets.front().getname() << endl;
+			SetConsoleTextAttribute(h, 7);
+			markedsheets.pop();
+		}
+		system("pause");
+		print_report();
+	}
+};
+
+int main()
+{
+	PaperManager P1("data.csv");
+	P1.process();
+
+
+	return 0;
+}

@@ -1,0 +1,285 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template <class T>
+class AVL;
+
+template <class S>
+class Node {
+private:
+	S key;
+	int height;
+	Node<S>* left;
+	Node<S>* right;
+	Node(S key) : key(key), height(1), left(NULL), right(NULL) {}
+	friend class AVL<S>;
+};
+
+template <class T>
+class AVL {
+private:
+	Node<T>* root;
+	int avlHeight(Node<T>* n1) 
+	{
+		if (n1 == NULL)
+			return 0;
+		return n1->height;
+	}
+	int max(T a, T b) 
+	{
+		return (a > b) ? a : b;
+	}
+	int getBalance(Node<T>* n1) 
+	{
+		if (n1 == NULL)
+			return 0;
+		return avlHeight(n1->left) - avlHeight(n1->right);
+	}
+	Node<T>* insert(int data, Node<T>* curr) 
+	{
+		if (curr == NULL) 
+		{
+			Node<T>* n1 = new Node<T>(data);
+			return n1;
+		}
+		if (data < curr->key) 
+			curr->left = insert(data, curr->left);
+		else if (data > curr->key) 
+			curr->right = insert(data, curr->right);
+		else 
+			return curr;
+		curr->height = max(avlHeight(curr->left), avlHeight(curr->right)) + 1;
+		
+		int BF = getBalance(curr);
+		if (BF > 1) 
+		{
+			if (data < curr->left->key) 
+				return SingleRightRotation(curr);
+			else 
+			{
+				curr->left = SingleLeftRotation(curr->left);
+				return SingleRightRotation(curr);
+			}
+		}
+		else if (BF < -1) 
+		{
+			if (data > curr->right->key) 
+				return SingleLeftRotation(curr);
+			else 
+			{
+				curr->right = SingleRightRotation(curr->right);
+				return SingleLeftRotation(curr);
+			}
+		}
+		return curr;
+	}
+	Node<T>* SingleRightRotation(Node<T>* n1) 
+	{
+		Node<T>* n2 = n1->left;
+		Node<T>* save = n2->right;
+		n2->right = n1;
+		n1->left = save;
+		n1->height = max(avlHeight(n1->left), avlHeight(n1->right)) + 1;
+		n2->height = max(avlHeight(n2->left), avlHeight(n2->right)) + 1;
+		return n2;
+	}
+	Node<T>* SingleLeftRotation(Node<T>* n1) 
+	{
+		Node<T>* n2 = n1->right;
+		Node<T>* save = n2->left;
+		n2->left = n1;
+		n1->right = save;
+		n1->height = max(avlHeight(n1->left), avlHeight(n1->right)) + 1;
+		n2->height = max(avlHeight(n2->left), avlHeight(n2->right)) + 1;
+		return n2;
+	}
+	Node<T>* search(int key, Node<T>* curr) 
+	{
+		if (curr == NULL) return curr;
+		else if (curr->key == key) return curr;
+		else if (key < curr->key) return search(key, curr->left);
+		else return search(key, curr->right);
+	}
+	void display_inorder(Node<T>* curr) 
+	{
+		if (curr != NULL) 
+		{
+			display_inorder(curr->left);
+			cout << curr->key << " ";
+			display_inorder(curr->right);
+		}
+	}
+	Node<T>* min(Node<T>* curr) 
+	{
+		if (curr->left == NULL)
+			return curr;
+		return min(curr->left);
+	}
+	void display_preorder(Node<T>* curr) {
+		if (curr != NULL) {
+			cout << curr->key << " ";
+			display_preorder(curr->left);
+			display_preorder(curr->right);
+		}
+	}
+	void display_postorder(Node<T>* curr) {
+		if (curr != NULL) {
+			display_postorder(curr->left);
+			display_postorder(curr->right);
+			cout << curr->key << " ";
+		}
+	}
+	bool isAvl(Node<T>* curr) {
+		if (curr == NULL)
+			return true;
+		int BF = getBalance(curr);
+		if (BF > 1 || BF < -1)
+			return false;
+		return isAvl(curr->left) && isAvl(curr->right);
+	}
+	void printAllPaths(Node<T>* curr, vector<T> path) {
+		if (curr == NULL)
+			return;
+
+		path.push_back(curr->key);
+
+		if (curr->left == NULL && curr->right == NULL) 
+		{
+			cout << "Path: ";
+			for (int i = 0; i < path.size(); i++)
+				cout << path[i] << " ";
+			cout << endl;
+		}
+		else
+		{
+			printAllPaths(curr->left, path);
+			printAllPaths(curr->right, path);
+		}
+	}
+	Node<T>* deleteNode(T key, Node<T>* curr) {
+		if (curr == NULL)
+			return curr;
+
+		if (key < curr->key)
+			curr->left = deleteNode(key, curr->left);
+		else if (key > curr->key)
+			curr->right = deleteNode(key, curr->right);
+		else {
+			if (curr->left == NULL) {
+				Node<T>* temp = curr->right;
+				delete curr;
+				return temp;
+			}
+			else if (curr->right == NULL) {
+				Node<T>* temp = curr->left;
+				delete curr;
+				return temp;
+			}
+
+			Node<T>* temp = min(curr->right);
+
+			curr->key = temp->key;
+
+			curr->right = deleteNode(temp->key, curr->right);
+		}
+
+		curr->height = 1 + max(avlHeight(curr->left), avlHeight(curr->right));
+
+		int balance = getBalance(curr);
+
+		if (balance > 1) {
+			if (getBalance(curr->left) >= 0)
+				return SingleRightRotation(curr);
+			else {
+				curr->left = SingleLeftRotation(curr->left);
+				return SingleRightRotation(curr);
+			}
+		}
+		else if (balance < -1) {
+			if (getBalance(curr->right) <= 0)
+				return SingleLeftRotation(curr);
+			else {
+				curr->right = SingleRightRotation(curr->right);
+				return SingleLeftRotation(curr);
+			}
+		}
+
+		return curr;
+	}
+public:
+	AVL() 
+	{
+		root = NULL;
+	}
+	void remove(T key) 
+	{
+		root = deleteNode(key, root);
+	}
+	void insert(T data) 
+	{
+		root = insert(data, root);
+	}
+	bool search(T data) 
+	{
+		Node<T>* temp = search(data, root);
+		return (temp != NULL);
+	}
+	T findmin() 
+	{
+		return min(root)->key;
+	}
+	void display_inorder() 
+	{
+		display_inorder(root);
+		cout << endl;
+	}
+	void display_preorder() 
+	{
+		display_preorder(root);
+	}
+	void display_postorder() 
+	{
+		display_postorder(root);
+		cout << endl;
+	}
+	bool isAvl() 
+	{
+		return isAvl(root);
+	}
+	void printAllPaths() 
+	{
+		vector<T> path;
+		printAllPaths(root, path);
+	}
+
+};
+int main() {
+	AVL<int> t;
+	cout << "Inserting 21, 26, 30, 9, 4, 14, 28, 7 in AVLTree\n";
+	t.insert(21);
+	t.insert(26);
+	t.insert(30);
+	t.insert(9);
+	t.insert(4);
+	t.insert(14);
+	t.insert(28);
+	t.insert(20);
+	t.insert(7);
+	cout << endl;
+	cout << "Display In Order:\n";
+	t.display_inorder();
+	cout << endl;
+	cout << "Display Pre Order:\n";
+	t.display_preorder();
+	cout << endl;
+	cout << endl;
+	cout << "Display Post Order:\n";
+	t.display_postorder();
+	cout << endl;
+	cout << "Is AVL? ";
+	cout << t.isAvl() << endl;
+	cout << endl;
+	t.printAllPaths();
+	return 0;
+}

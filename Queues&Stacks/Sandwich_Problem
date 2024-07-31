@@ -1,0 +1,51 @@
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+
+int eatlunch(int* sandwiches, int* students, int size)
+{
+	stack<int>s;
+	queue<int>q;
+	int ctr=0;
+	for(int i=0; i<size; i++)
+	{
+		s.push(sandwiches[size-i-1]);
+		q.push(students[i]);
+	}
+	while(!s.empty())
+	{
+		int x= q.front();
+		q.pop();
+		if(s.top()==x)
+		{
+			ctr=0;
+			s.pop();
+		}	
+		else if(ctr>=s.size())
+			return ctr;
+		else
+		{
+			ctr++;
+			q.push(x);
+		}
+	}
+	return 0;
+}
+int main() {
+	int std[4]={1, 1, 0, 0};
+	int snd[4]={0, 1, 0, 1};
+	
+//	int std[6]={1, 1, 1, 0, 0, 1};
+//	int snd[6]={1, 0, 0, 0, 1, 1};
+	
+	cout<<eatlunch(snd, std, 4);
+	
+	
+
+
+}

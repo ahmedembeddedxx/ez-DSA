@@ -1,0 +1,87 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+using namespace std;
+
+void heapifyup(int arr[], int size, int i)
+{
+	while (i > 0)
+	{
+		int parent = (i - 1) / 2;
+		if (arr[i] < arr[parent])
+		{
+			swap(arr[i], arr[parent]);
+			i = parent;
+		}
+		else
+			break;
+	}
+}
+void arrange(int arr[], int size, int i)
+{
+	int left_child = 2 * i + 1;
+	int right_child = 2 * i + 2;
+	int smallest = i;
+
+	if (left_child < size && arr[left_child] < arr[smallest])
+		smallest = left_child;
+	if (right_child < size && arr[right_child] < arr[smallest])
+		smallest = right_child;
+	if (smallest != i)
+		swap(arr[i], arr[smallest]);
+	if (arr[left_child] > arr[right_child])
+		swap(arr[left_child], arr[right_child]);
+
+}
+void heapifydown(int arr[], int size, int i)
+{
+	while (true)
+	{
+		int left_child = 2 * i + 1;
+		int right_child = 2 * i + 2;
+		int smallest = i;
+
+		if (left_child < size && arr[left_child] < arr[smallest])
+			smallest = left_child;
+		if (right_child < size && arr[right_child] < arr[smallest])
+			smallest = right_child;
+		if (smallest != i)
+		{
+			swap(arr[i], arr[smallest]);
+			i = smallest;
+		}
+		else
+			break;
+	}
+}
+void BSTtoHeap(int arr[], int size)
+{
+	int min_index = 0;
+
+	while (min_index < size)
+	{
+		int left_child = 2 * min_index + 1;
+		if (left_child < size)
+			min_index = left_child;
+		else
+			break;
+	}
+	heapifyup(arr, size, min_index);
+	heapifydown(arr, size, 1);
+	heapifydown(arr, size, 2);
+
+
+	for (int i = 0; i < size; i++)
+		arrange(arr, size, i);
+}
+
+int main()
+{
+	int arr[] = { 15, 10, 20, 5, 12, 17, 25, 4, 7, 11, 14, 16, 18, 21, 27 };
+	BSTtoHeap(arr, 15);
+	for (int i = 0; i < 15; i++)
+		cout << arr[i] << " ";
+
+}

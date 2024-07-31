@@ -1,0 +1,129 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+class Node
+{
+	Node* right, * left;
+	int data;
+	Node(int data)
+	{
+		this->data = data;
+		right = left = nullptr;
+	}
+	friend class BST;
+};
+
+class BST
+{
+	Node* root;
+	void insert(Node* &root, int data)
+	{
+		if (root == nullptr)
+		{
+			root = new Node(data);
+			return;
+		}
+		if (root->data < data)
+			insert(root->right, data);
+		else if (root->data > data)
+			insert(root->left, data);
+		return;
+	}
+	void inordertraversal(Node* root)
+	{
+		if (root == nullptr)
+			return;
+		inordertraversal(root->left);
+		cout << root->data << " ";
+		inordertraversal(root->right);
+	}
+	void postordertraversal(Node* root)
+	{
+		if (root == nullptr)
+			return;
+		postordertraversal(root->left);
+		postordertraversal(root->right);
+		cout << root->data << " ";
+	}
+	void preordertraversal(Node* root)
+	{
+		if (root == nullptr)
+			return;
+		cout << root->data << " ";
+		preordertraversal(root->left);
+		preordertraversal(root->right);
+	}
+public:
+	BST()
+	{
+		root = nullptr;
+	}
+	void insert(int data)
+	{
+		insert(root, data);
+	}
+	void inordertraversal()
+	{
+		inordertraversal(root);
+	}
+	void preordertraversal()
+	{
+		preordertraversal(root);
+	}
+	void postordertraversal()
+	{
+		postordertraversal(root);
+	}
+	void levelordertraversal()
+	{
+		if (root == nullptr)
+			return;
+		queue<Node*> order;
+		Node* curr = root;
+		order.push(curr);
+		int row = 0;
+		int counts = 0;
+		while (!order.empty())
+		{
+			Node* parent = order.front();
+			if (parent != nullptr)
+			{
+				cout << parent->data << " ";
+				order.push(parent->left);
+				order.push(parent->right);
+			}
+			order.pop();
+			counts++;
+			if (counts == pow(2, row))
+			{
+				cout << endl;
+				row++;
+				counts = 0;
+			}
+		}
+	}
+
+};
+
+int main()
+{
+	BST B1;
+	B1.insert(25);
+	B1.insert(30);
+	B1.insert(40);
+	B1.insert(20);
+	B1.preordertraversal();
+	cout << endl;
+	B1.postordertraversal();
+	cout << endl;
+	B1.inordertraversal();
+	cout << endl;
+	B1.levelordertraversal();
+}

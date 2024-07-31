@@ -1,0 +1,67 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+bool isEqual(string str)
+{
+	stack <char> S;
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (str[i] == '{' || str[i] == '(' || str[i] == '[')
+			S.push(str[i]);
+		else if (str[i] == '}')
+		{
+			if (S.top() != '{')
+				return false;
+			S.pop();
+		}
+		else if (str[i] == ']')
+		{
+			if (S.top() != '[')
+				return false;
+			S.pop();
+		}
+		else if (str[i] == ')')
+		{
+			if (S.top() != '(')
+				return false;
+			S.pop();
+		}
+		else
+		{
+			return false;
+		}
+	}
+	if (S.empty())
+		return true;
+	return false;
+
+}
+
+
+int main() {
+
+	string A = "{[()]}()";
+	string B = "{[(]}()";
+
+	try
+	{
+		if (isEqual(A))
+			cout << "Expression " << A << " is balanced\n";
+		else
+			cout << "Expression " << A << " is not balanced\n";
+
+		if (isEqual(B))
+			cout << "Expression " << B << " is balanced\n";
+		else
+			cout << "Expression " << B << " is not balanced\n";
+	}
+	catch (...)
+	{
+		cerr << "Unknown Error Detected\n";
+	};
+
+
+
+	return 0;
+}

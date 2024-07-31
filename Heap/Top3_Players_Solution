@@ -1,0 +1,80 @@
+#include <iostream>
+#include <list>
+#include <stack>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <cstring>
+using namespace std;
+
+class Player
+{
+	int score;
+	int ranking;
+public:
+	Player()
+	{
+		score = rand();
+		ranking = rand();
+	}
+	bool operator<(Player& other)
+	{
+		if (this->score < other.score)
+			return true;
+		return false;
+	}
+};
+template <class T>
+class MaxHeap
+{
+	vector<T> arr;
+public:
+	void insert(T data)
+	{
+		arr.push_back(T);
+	}
+	void heapifyup(int i)
+	{
+		int parent = (i - 1) / 2;
+		while (i > 0)
+		{
+			if (arr[i] > arr[parent])
+			{
+				swap(arr[i], arr[parent]);
+				i = parent;
+			}
+			else
+				break;
+		}
+
+
+	}
+	void heapifydown(int i)
+	{
+		while (true)
+		{
+			int rightchild = 2 * i + 2;
+			int leftchild = 2 * i + 1;
+			int largest = i;
+			if (leftchild < arr.size() && arr[leftchild] > arr[i])
+				largest = leftchild;
+			if (rightchild < arr.size() && arr[rightchild] > arr[i])
+				largest = rightchild;
+			if (largest != i)
+			{
+				swap(arr[i], arr[largest]);
+				i = largest;
+			}
+			else
+				break;
+
+		}
+	}
+};
+
+int main()
+{
+	
+
+}

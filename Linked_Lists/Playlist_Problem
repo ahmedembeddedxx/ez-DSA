@@ -1,0 +1,172 @@
+#include <iostream>
+#include <string>
+using namespace std;
+class Song {
+public:
+	string title;
+	string artist;
+	int duration;
+	Song* next;
+	Song* prev;
+	Song(string title, string artist, int duration) {
+		this->title = title;
+		this->artist = artist;
+		this->duration = duration;
+		this->next = NULL;
+		this->prev = NULL;
+	}
+	
+	
+	
+};
+class Playlist {
+private:
+	string title;
+	Song* song_head;
+	Playlist* sub_playlist_head;
+	Playlist* next=NULL;
+public:
+	Playlist(string title) {
+		this->title = title;
+		this->song_head = NULL;
+		this->sub_playlist_head = NULL;
+	}
+	void add_song(Song* song) {
+		if(song_head==NULL)
+		{
+			sub_playlist_head=this;
+			song_head=song;
+			return;
+		}
+		Song* curr=song_head;
+		while(curr->next!=NULL)
+		{
+			curr=curr->next;
+		}	
+		curr->next=song;
+		song->prev=curr->next;		
+		
+		return;
+	}
+	void add_sub_playlist(Playlist* sub_playlist) {
+		if(sub_playlist_head==NULL)
+		{
+			sub_playlist_head=sub_playlist;
+			return;
+		}
+		Playlist* curr=sub_playlist_head;
+		while(curr->next!=NULL)
+		{
+			curr=curr->next;
+		}
+		curr->next=sub_playlist;
+		return;
+	}
+	void remove_song_playlist(Song* song) {
+		if(song_head == NULL)
+			return;
+			
+		Song* curr=song_head;
+		while(curr->next!=song)
+		{
+			if(curr->next==NULL)
+			{
+				return;
+			}
+			curr=curr->next;
+		}
+		Song* temp=curr->next;
+		curr->next=curr->next->next;
+
+		delete temp;
+		temp=NULL;
+	}
+	void remove_song(Song* song) {
+		if(sub_playlist_head==NULL)
+			return;
+		Playlist* curr=sub_playlist_head;
+		while(curr!=NULL)
+		{
+			curr->remove_song_playlist(song);
+			curr=curr->next;
+		}
+	}
+	void remove_sub_playlist(Playlist* sub_playlist) {
+		if(sub_playlist_head==NULL)
+		{
+			return;
+		}
+		Playlist* curr=sub_playlist_head;
+		while(curr->next!=sub_playlist && curr->next!=NULL)
+		{
+			curr=curr->next;
+		}
+		Playlist* temp=curr->next;
+		
+		curr->next=temp->next;
+		
+		delete temp;
+		temp=NULL;
+		return;
+	}	
+	int get_total_duration_playlist() {
+		int sum=0;
+		if(song_head==NULL)
+			return sum;
+		Song* curr=song_head;
+		while(curr!=NULL)
+		{
+			sum+=curr->duration;
+			curr=curr->next;
+		}	
+		return sum;
+	}
+	int get_total_duration() {
+		if(sub_playlist_head==NULL)
+			return 0;
+		int sum=0;
+		Playlist* curr=sub_playlist_head;
+		while(curr!=NULL)
+		{
+			sum+=curr->get_total_duration_playlist();
+			curr=curr->next;
+		}
+		
+		return sum;
+	}
+};
+int main() {
+
+// Creating songs
+	Song* song1 = new Song("Bones", "Imagine Dragons", 240);
+	Song* song2 = new Song("Bohemian Rhapsody", "Queen", 360);
+	Song* song3 = new Song("Slow Dancing in the Dark", "Joji", 420);
+	Song* song4 = new Song("Imagine", "John Lennon", 280);
+	
+	Playlist* top_playlist = new Playlist("Top Playlist");
+	top_playlist->add_song(song1);
+	top_playlist->add_song(song2);
+	
+	Playlist* sub_playlist = new Playlist("Sub Playlist");
+	sub_playlist->add_song(song3);
+	sub_playlist->add_song(song4);
+	
+	top_playlist->add_sub_playlist(sub_playlist);
+	
+	int total_duration = top_playlist->get_total_duration();
+	cout << "Total Duration of Top Playlist: " << total_duration << " seconds\n";
+	
+	sub_playlist->remove_song(song3);
+	
+	total_duration = top_playlist->get_total_duration();
+	cout << "Total Duration of Top Playlist (after removing a song): " <<
+	total_duration << " seconds" << endl;
+	
+	// Clean up memory (delete dynamically allocated objects)
+	delete song1;
+	delete song2;
+	delete song3;
+	delete song4;
+	delete top_playlist;
+	delete sub_playlist;
+}

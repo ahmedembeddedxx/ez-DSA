@@ -1,0 +1,74 @@
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Queue 
+{
+	int front, rear,  maxSize;
+	T* arr;
+public:
+	Queue(int i = 1)
+	{
+		front = rear = -1;
+		arr = new T[i];
+		maxSize = i;
+	}
+	bool isEmpty()
+	{
+		return front == -1 && rear == -1;
+	}
+	bool isFull()
+	{
+		return rear == maxSize;
+	}
+	void enqueue(T data)
+	{
+		if (isFull())
+			return;
+		if (isEmpty())
+		{
+			front = 0;
+			rear = 0;
+		}
+		arr[rear] = data;
+		rear++;
+	}
+	int dequeue()
+	{
+		if (isEmpty())
+			return - 1;
+		int v = arr[front];
+		for (int i = front; i < rear; i++)
+		{
+			arr[i] = arr[i + 1];
+		}
+		rear -= 1;
+		return v;
+	}
+	void print()
+	{
+		for (int i = 0; i < rear; i++)
+			cout << arr[i] << " ";
+
+		cout << endl;
+	}
+	~Queue()
+	{
+		delete arr;
+	}
+};
+
+int main()
+{
+	Queue<char> Q1(10);
+	Q1.enqueue('M');
+	Q1.enqueue('A');
+	Q1.enqueue('H');
+	Q1.enqueue('M');
+	Q1.enqueue('E');
+	Q1.enqueue('D');
+	Q1.dequeue();
+
+	Q1.print();
+
+}

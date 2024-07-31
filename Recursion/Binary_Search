@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+bool binarySearch(int* arr, int num, int first, int last)
+{
+	int mid = (last + first) / 2;
+	if (first >= last)
+	{
+		cout << "Key (" << num << ") was not found!!\n";
+		return true;
+	}
+	if (arr[mid] == num)
+	{
+		cout << "Key (" << num << ") has been found!!\n";
+		return true;
+	}
+
+	if (num > arr[mid])
+		return binarySearch(arr, num, mid + 1, last);
+	if (num < arr[mid])
+		return binarySearch(arr, num, first, mid - 1);
+}
+
+int main()
+{
+cout << "---------------------------\n";
+cout << "---------------------------\n";
+int arr[10] = { 1, 2, 3, 4, 5, 6, 7 ,8, 8, 10 };
+cout << '[';
+for (int i = 0; i < 10; i++)
+	cout << arr[i] << ' ';
+cout << ']' << endl;
+binarySearch(arr, 8, 0, 10);
+cout << "---------------------------\n";
+cout << "---------------------------\n";
+}

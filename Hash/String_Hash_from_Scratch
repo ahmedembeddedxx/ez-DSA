@@ -1,0 +1,168 @@
+#include <iostream>
+using namespace std;
+
+class HashTable;
+class HashItem
+{
+	friend class HashTable;
+private:
+	int key;
+	string value;
+	int status;
+	HashItem()
+	{
+		status = 0;
+	}
+	~HashItem()
+	{
+	}
+};
+
+class HashTable
+{
+private:
+	HashItem* hashArray;
+	int capacity;
+	int currentElements;
+	int getNextCandidateIndex(int key, int i)
+	{
+		return (key + i) % capacity;
+	}
+	void doublecapacity()
+	{
+		HashItem* temp = hashArray;
+		int temp_capacity = capacity;
+
+		capacity *= 2;
+		hashArray = new HashItem[capacity];
+		currentElements = 0;
+		for (int i = 0; i < temp_capacity; i++)
+		{
+			if (temp[i].status == 1)
+			{
+				int temp_key = temp[i].key;
+				string temp_value = temp[i].value;
+
+				int index = getNextCandidateIndex(temp_key, 0);
+				while (hashArray[index].status != 0)
+					index = getNextCandidateIndex(temp_key, index + 1);
+
+				hashArray[index].key = temp_key;
+				hashArray[index].value = temp_value;
+				hashArray[index].status = 1;
+				currentElements++;
+			}
+		}
+		delete[] temp;
+	}
+	int quadgetNextCandidateIndex(int key, int i)
+	{
+		return (key + i*i) % capacity;
+	}
+public:
+	HashTable()
+	{
+		hashArray = new HashItem[10];
+		capacity = 10;
+		currentElements = 0;
+	}
+	HashTable(int capacity)
+	{
+		if (capacity < 1)
+		{
+			cout << "Capacity cannot be defined less than 1\n";
+			capacity = 10;
+			return;
+		}
+		hashArray = new HashItem[capacity];
+		this->capacity = capacity;
+		currentElements = 0;
+	}
+	void insert(int const key, string const value)
+	{
+		if (currentElements >= (capacity * 0.75))
+			doublecapacity();
+
+		int index = getNextCandidateIndex(key, 0);
+		while (hashArray[index].status == 1)
+		{
+			if (hashArray[index].key == key)
+			{
+				hashArray[index].value = value;
+				return;
+			}
+			index = getNextCandidateIndex(key, index + 1);
+		}
+		hashArray[index].key = key;
+		hashArray[index].value = value;
+		hashArray[index].status = 1;
+
+		currentElements++;
+
+	}
+	bool deleteKey(int const key)
+	{
+		int index = getNextCandidateIndex(key, 0);
+		while (hashArray[index].status != 0)
+		{
+			if (hashArray[index].key == key && hashArray[index].status == 1)
+			{
+				hashArray[index].status = -1;
+				currentElements--;
+				return true;
+			}
+			index = getNextCandidateIndex(key, index + 1);
+		}
+		return false;
+	}
+	string get(int const key)
+	{
+		if(currentElements==0)
+			return "Not Found";
+
+		int index = getNextCandidateIndex(key, 0);
+		while (hashArray[index].status == 1)
+		{
+			if (hashArray[index].key == key && hashArray[index].status == 1)
+			{
+				return hashArray[index].value;
+			}
+			index = getNextCandidateIndex(key, index + 1);
+		}
+		return "Not Found";
+	}
+	~HashTable()
+	{
+		delete[] hashArray;
+	}
+};
+
+
+int main() {
+	HashTable hashtable(5);
+	hashtable.insert(101, "Alice");
+	hashtable.insert(201, "Bob");
+	hashtable.insert(301, "Charlie");
+	hashtable.insert(401, "David");
+	hashtable.insert(501, "Eva");
+
+	string name = hashtable.get(201);
+	if (name.length() != 0)
+		cout << "Value at key 201: " << name << endl;
+	else
+		cout << name << endl;
+	
+	bool deleted = hashtable.deleteKey(301);
+	if (deleted)
+		cout << "Key 301 deleted successfully." << endl;
+	else
+		cout << "Key 301 not found!" << endl;
+	
+	name = hashtable.get(301);
+	if (name.length() != 0) 
+		cout << "Value at key 301: " << name << endl;
+	else
+		cout << name << endl;
+	return 0;
+}
+

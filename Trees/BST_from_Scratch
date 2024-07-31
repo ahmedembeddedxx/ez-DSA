@@ -1,0 +1,300 @@
+#include <iostream>
+using namespace std;
+
+class Node
+{
+public:
+	int data;
+	Node* left;
+	Node* right;
+	Node(int v = 0)
+	{
+		this->data = v;
+		left = nullptr;
+		right = nullptr;
+	}
+	~Node()
+	{
+	}
+};
+
+class BST
+{
+	Node* root;
+	int getHeight(Node* node) const
+	{
+		if (node == nullptr)
+			return 0;
+		int left = getHeight(node->left);
+		int right = getHeight(node->right);
+		return max(left, right) + 1;
+	}
+	Node* deepcopy(Node* curr)
+	{
+		if (curr == nullptr)
+			return curr;
+		Node* newNode = new Node(curr->data);
+		newNode->left = deepcopy(curr->left);
+		newNode->right = deepcopy(curr->right);
+		return newNode;
+	}
+	bool insert(int v, Node*& curr)
+	{
+		if (curr == nullptr)
+		{
+			curr = new Node(v);
+			return true;
+		}
+		else if (v < curr->data)
+			return insert(v, curr->left);
+		else if (v > curr->data)
+			return insert(v, curr->right);
+		return false;
+	}
+	void printFirstRight(Node* curr, int level)
+	{
+		if (curr == nullptr)
+			return;
+		if (level == 1)
+			cout << curr->data << " ";
+		else if (level > 1) 
+			printFirstRight(curr->right, level - 1);
+	}
+	void printFirstLeft(Node* curr, int level)
+	{
+		if (curr == nullptr)
+			return;
+		if (level == 1)
+			cout << curr->data << " ";
+		else if (level > 1)
+			printFirstLeft(curr->left, level - 1);
+	}
+
+public:
+	BST()
+	{
+		root = nullptr;
+	}
+	BST(const BST& other)
+	{
+		root = deepcopy(other.root);
+	}
+	 Node* minValueNode(Node* node)
+	    {
+	        Node* current = node;
+	
+	        // Find the leftmost leaf node
+	        while (current->left != nullptr)
+	            current = current->left;
+	
+	        return current;
+	    }
+	
+	    // Function to delete a node with the given key from the BST
+	    Node* deleteNode(Node* root, int key)
+	    {
+	        // Base case: If the tree is empty
+	        if (root == nullptr)
+	            return root;
+	
+	        // Recursive case: Traverse the tree to find the node to be deleted
+	        if (key < root->data)
+	            root->left = deleteNode(root->left, key);
+	        else if (key > root->data)
+	            root->right = deleteNode(root->right, key);
+	        else
+	        {
+	            // Node with only one child or no child
+	            if (root->left == nullptr)
+	            {
+	                Node* temp = root->right;
+	                delete root;
+	                return temp;
+	            }
+	            else if (root->right == nullptr)
+	            {
+	                Node* temp = root->left;
+	                delete root;
+	                return temp;
+	            }
+	
+	            // Node with two children: Get the inorder successor (smallest in the right subtree)
+	            Node* temp = minValueNode(root->right);
+	
+	            // Copy the inorder successor's data to this node
+	            root->data = temp->data;
+	
+	            // Delete the inorder successor
+	            root->right = deleteNode(root->right, temp->data);
+	        }
+	        return root;
+	    }
+
+	void printLevel(Node* curr, int level)
+	{
+		if (curr == nullptr)
+			return;
+		if (level == 1)
+			cout << curr->data << " ";
+		else if (level > 1)
+		{
+			printLevel(curr->left, level - 1);
+			printLevel(curr->right, level - 1);
+		}
+	}
+	void levelorderPrint()
+	{
+		if (root == nullptr)
+			return;
+		int h = getHeight(root);
+
+		for (int i = 1; i <= h; i++)
+		{
+			printLevel(root, i);
+			cout << endl;
+		}
+
+	}
+	bool insert(int v)
+	{
+		return insert(v, root);
+	}
+	void inorderPrint(int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		if (curr == nullptr)
+			return;
+		inorderPrint(1, curr->left);
+		cout << curr->data << " ";
+		inorderPrint(1, curr->right);
+	}
+	void preorderPrint(int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		if (curr == nullptr)
+			return;
+		cout << curr->data << " ";
+		preorderPrint(1, curr->left);
+		preorderPrint(1, curr->right);
+	}
+	void postorderPrint(int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		if (curr == nullptr)
+			return;
+		postorderPrint(1, curr->left);
+		postorderPrint(1, curr->right);
+		cout << curr->data << " ";
+	}
+
+
+	Node* search(int key, int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		if (curr == nullptr)
+			return curr;
+		if (key == curr->data)
+			return curr;
+		if (key < curr->data)
+			return search(key, 1, curr->left);
+		else
+			return search(key, 1, curr->right);
+	}
+	int countNodes(int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		return (curr == nullptr) ? 0 : countNodes(1, curr->left) + countNodes(1, curr->right) + 1;
+	}
+	int leafCount(int i = 0, Node* curr = nullptr)
+	{
+		if (i == 0)
+			curr = root;
+		if (curr == nullptr)
+			return 0;
+		if (curr->left == nullptr && curr->right == nullptr)
+			return 1;
+		return leafCount(1, curr->left) + leafCount(1, curr->right);
+	}
+	void destroy(Node* curr)
+	{
+		if (curr == nullptr)
+			return;
+		destroy(curr->left);
+		destroy(curr->right);
+		delete curr;
+	}
+
+
+
+	void print_side_view(int i = 0, Node* curr = nullptr)
+	{
+		if (root == nullptr)
+			return;
+		int h = getHeight(root);
+
+		for (int i = 1; i <= h; i++)
+		{
+			printFirstLeft(root, i);
+			cout << "\t";
+			printFirstRight(root, i);
+			cout << endl;
+		}
+	}
+	~BST()
+	{
+		this->destroy(root);
+	}
+};
+
+
+int main()
+{
+	BST tree;
+
+	cout << "Creating BST..." << endl;
+
+	cout << "Inserting values into the BST:" << endl;
+	tree.insert(10);
+	cout << "Inserted 10" << endl;
+	tree.insert(5);
+	cout << "Inserted 5" << endl;
+	tree.insert(15);
+	cout << "Inserted 15" << endl;
+	tree.insert(3);
+	cout << "Inserted 3" << endl;
+	tree.insert(7);
+	cout << "Inserted 7" << endl;
+	tree.insert(17);
+	cout << "Inserted 17" << endl;
+	tree.insert(20);
+	cout << "Inserted 20" << endl;
+	tree.insert(25);
+	cout << "Inserted 25" << endl;
+
+
+	cout << "Inorder Traversal: ";
+	tree.inorderPrint();
+	cout << endl;
+
+	int keyToSearch = 15;
+	Node* foundNode = tree.search(keyToSearch);
+
+	if (foundNode != nullptr)
+		cout << "Found node with key " << keyToSearch << ": " << foundNode->data << endl;
+	else
+		cout << "Node with key " << keyToSearch << " not found." << endl;
+
+	cout << "Level Order Traversal:" << endl;
+	tree.levelorderPrint();
+	cout << "\nSide View" << endl;
+
+	tree.print_side_view();
+	cout << "Destroying BST..." << endl;
+
+	return 0;
+}

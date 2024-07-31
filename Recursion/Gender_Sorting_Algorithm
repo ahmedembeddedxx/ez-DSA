@@ -1,0 +1,261 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+#include <random>
+
+using namespace std;
+
+
+enum Gender
+{
+	Male, Female
+};
+
+enum FacingPosition
+{
+	Left, Right, Back, Front, Unknown
+};
+
+class Person
+{
+private:
+
+
+	Gender gender;
+	FacingPosition facingPosition;
+	string getFacingPositionStr()
+	{
+		switch (facingPosition)
+		{
+		case Left: return "L";
+		case Right: return "R";
+		case Front: return "F";
+		case Back: return "B";
+		default: return "U";
+		}
+	}
+	friend class PersonArranger;
+	int getrand() {
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_int_distribution<int> dist(0, 3);
+		return dist(gen);
+	}
+	Person(Gender g = Male, FacingPosition f = Unknown)
+	{
+		this->gender = g;
+		if (f == Unknown)
+		{
+			f = static_cast<FacingPosition>(getrand());
+		}
+		this->facingPosition = f;
+
+	}
+	Gender getGender() const { return gender; }
+	FacingPosition getFacingPosition() const { return facingPosition; }
+	void display()
+	{
+		string genderStr = (gender == Male) ? "M" : "F";
+		string facingStr = getFacingPositionStr();
+		cout << " |" << genderStr << " " << facingStr << "| ";
+	}
+	bool operator==(const Person& other) const
+	{
+		return (this->gender == other.gender || this->facingPosition == other.facingPosition);
+	}
+	Person& operator=(const Person& other)
+	{
+		if (this != &other) {
+			this->gender = other.gender;
+			this->facingPosition = other.facingPosition;
+		}
+		return *this;
+	}
+};
+
+class PersonArranger
+{
+	queue<Person> PersonQueue;
+	stack<Person> PersonStack;
+
+	int maxRows;
+	int maxCols;
+	void findFactors(int size, int factor, int& bestFactor1, int& bestFactor2) {
+		if (factor * factor <= size)
+		{
+			if (size % factor == 0)
+			{
+				int otherFactor = size / factor;
+				if (factor > bestFactor1)
+				{
+					bestFactor1 = factor;
+					bestFactor2 = otherFactor;
+				}
+			}
+			findFactors(size, factor + 1, bestFactor1, bestFactor2);
+		}
+	}
+	void updatesize(int size) {
+		int bestFactor1 = 1;
+		int bestFactor2 = size;
+		findFactors(size, 2, bestFactor1, bestFactor2);
+		maxRows = bestFactor1;
+		maxCols = bestFactor2;
+	}
+	int display(vector<vector<Person>>& grid, int row = 0, int col = 0, int ctr = 0)
+	{
+		int r = (col == maxCols - 1) ? row + 1 : row;
+		int c = (col == maxCols - 1) ? 0 : col + 1;
+		if (r >= maxRows && c == 1)
+			return ctr;
+
+		grid[row][col].display();
+		if (r > row)
+			cout << endl;
+		return display(grid, r, c, ctr + 1);
+
+	}
+	void fillgrid(vector<vector<Person>>& grid, int row = 0, int col = 0)
+	{
+		if (!PersonQueue.empty())
+		{
+			grid[row][col] = PersonQueue.front();
+			PersonStack.push(PersonQueue.front());
+			PersonQueue.pop();
+			int r = (col == maxCols - 1) ? row + 1 : row;
+			int c = (col == maxCols - 1) ? 0 : col + 1;
+			fillgrid(grid, r, c);
+		}
+		return;
+	}
+	void arrangeposition(vector<vector<Person>>& grid, int row = 0, int col = 0)
+	{
+		if (row >= maxRows)
+			return;
+		if ((row % 2 == 0 && col % 2 == 0) || (row % 2 == 1 && col % 2 == 1))
+			grid[row][col].gender = Male;
+		else
+			grid[row][col].gender = Female;
+		int nextRow = row;
+		int nextCol = col + 1;
+		if (nextCol == maxCols)
+		{
+			nextRow++;
+			nextCol = 0;
+		}
+		arrangeposition(grid, nextRow, nextCol);
+	}
+
+	bool checkPos(vector<vector<Person>>& grid, int row, int col)
+	{
+		Person P = grid[row][col];
+		int directions[4][2] =
+		{
+			{+0, -1}, {+0, +1}, {-1, +0}, {+1, +0}
+		};
+		for (int i = 0; i < 4; i++)
+		{
+			int newRow = row + directions[i][0];
+			int newCol = col + directions[i][1];
+			if (newRow >= 0 && newRow < maxRows && newCol >= 0 && newCol < maxCols)
+				if (grid[newRow][newCol] == P)
+					return false;
+		}
+		return true;
+	}
+	bool arrangedirection(vector<vector<Person>>& grid, int row = 0, int col = 0)
+	{
+		if (row == maxRows || maxRows <= 1 || maxCols <= 1)
+			return true;
+
+		int r = (col == maxCols - 1) ? row + 1 : row;
+		int c = (col == maxCols - 1) ? 0 : col + 1;
+		if (checkPos(grid, row, col))
+			if (arrangedirection(grid, r, c))
+				return true;
+		for (int i = 0; i < 4; i++)
+		{
+			FacingPosition fp = static_cast<FacingPosition>(i);
+			grid[row][col].facingPosition = fp;
+
+			if (checkPos(grid, row, col))
+				if (arrangedirection(grid, r, c))
+					return true;
+		}
+		return false;
+	}
+
+public:
+	bool read_csv(string filename)
+	{
+		ifstream fin;
+		fin.open(filename);
+		if (!fin.is_open())
+		{
+			cerr << "Error: Unable to open the file " << filename << endl;
+			return false;
+		}
+		string line;
+		if (getline(fin, line))
+		{
+			for (int i = 0; line[i] != '\0'; i++)
+			{
+				Gender g;
+				FacingPosition fp = Unknown;
+				if (line[i] == 'M')
+					g = Male;
+				else if (line[i] == 'F')
+					g = Female;
+				else
+					continue;
+				PersonQueue.push(Person(g, fp));
+			}
+		}
+		else
+			cerr << "Error: Empty file." << endl;
+		fin.close();
+		updatesize(PersonQueue.size());
+		if (PersonQueue.size() == 1)
+		{
+			cout << "Data Received: \n";
+			PersonQueue.front().display();
+			cout << "\nUpdated Arrangement: \n";
+			PersonQueue.front().display();
+			return false;
+		}
+		return true;
+	}
+	void process()
+	{
+		vector<vector<Person>> grid(maxRows, vector<Person>(maxCols, Person(Male, Unknown)));
+		fillgrid(grid);
+		cout << "Data Received: \n";
+		display(grid);
+		cout << endl;
+		cout << "Updated Arrangement: \n";
+		arrangeposition(grid);
+
+		if (arrangedirection(grid))
+		{
+			if (display(grid) != maxCols * maxRows)
+				cerr << "Ideal Combination does not exist\n";
+		}
+		else
+			cerr << "Ideal Combination does not exist\n";
+
+	}
+};
+
+int main()
+{
+	PersonArranger PA;
+	if (PA.read_csv("people.csv"))
+		PA.process();
+
+
+	return 0;
+}

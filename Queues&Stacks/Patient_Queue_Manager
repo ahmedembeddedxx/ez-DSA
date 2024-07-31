@@ -1,0 +1,393 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <conio.h>
+#include <windows.h>
+#include <fstream>
+#include <sstream>
+using namespace std;
+
+enum Condition
+{
+	Normal, Critical, Intense
+};
+enum Priority
+{
+	NRefNSen, RefNSen, NRefSen, RefSen
+};
+
+class Patient
+{
+	friend class PatientQueue;
+	friend class QueueManager;
+	string name;
+	Condition condition;
+	Priority priority;
+	int age;
+	Patient* next;
+	Patient(string name, int age, Priority priority, Condition condition)
+	{
+		this->name = name;
+		this->age = age;
+		this->condition = condition;
+		this->priority = priority;
+		this->next = nullptr;
+	}
+};
+
+
+class PatientQueue
+{
+	friend class QueueManager;
+	Patient* front;
+	Patient* rear;
+
+	PatientQueue()
+	{
+		front = nullptr;
+		rear = nullptr;
+	}
+	bool isEmpty()
+	{
+		return front == nullptr;
+	}
+	void push(Patient* P)
+	{
+		if (isEmpty())
+		{
+			front = P;
+			rear = P;
+		}
+		else
+		{
+			rear->next = P;
+			rear = P;
+		}
+	}
+	void pop()
+	{
+		if (isEmpty())
+			return;
+		Patient* temp = front;
+		front = front->next;
+		delete temp;
+	}
+	Patient* update(string& name, Condition condition)
+	{
+		Patient* curr = front;
+		while (curr != nullptr)
+		{
+			if (curr->next->name == name && curr->next->condition != condition)
+			{
+				Patient* temp = curr->next;
+				temp->condition = condition;
+				curr->next = temp->next;
+				return temp;
+			}
+			curr = curr->next;
+		}
+		return nullptr;
+	}
+	Patient* peak()
+	{
+		return front;
+	}
+	~PatientQueue()
+	{
+	}
+};
+
+
+class QueueManager
+{
+	PatientQueue primary;
+	void push(Patient* newPatient)
+	{
+		try
+		{
+			if (primary.isEmpty())
+			{
+				primary.push(newPatient);
+				return;
+			}
+			else
+			{
+				bool isplaced = false;
+				PatientQueue temp;
+				while (!primary.isEmpty())
+				{
+					Patient* curr = new Patient(primary.peak()->name, primary.peak()->age, primary.peak()->priority, primary.peak()->condition);
+					if (!isplaced)
+					{
+						if (newPatient->condition > curr->condition)
+						{
+							temp.push(newPatient);
+							isplaced = true;
+						}
+						else if (newPatient->condition == curr->condition)
+						{
+							if (newPatient->priority > curr->priority)
+							{
+								temp.push(newPatient);
+								isplaced = true;
+							}
+						}
+					}
+
+					temp.push(curr);
+					primary.pop();
+				}
+				if (!isplaced)
+					temp.push(newPatient);
+				while (!temp.isEmpty())
+				{
+					Patient* curr = new Patient(temp.peak()->name, temp.peak()->age, temp.peak()->priority, temp.peak()->condition);
+					primary.push(curr);
+					temp.pop();
+				}
+			}
+			reorganizeOldPatients();
+		}
+		catch (...)
+		{
+			cerr << "Unknown Exception Happened!!\n";
+		}
+	}
+	void reorganizeOldPatients()
+	{
+		PatientQueue Pa60;
+		PatientQueue Pb60;
+		while (!primary.isEmpty())
+		{
+			Patient* curr = new Patient(primary.peak()->name, primary.peak()->age, primary.peak()->priority, primary.peak()->condition);
+			if (curr->age >= 60)
+				Pa60.push(curr);
+			if (curr->age < 60)
+				Pb60.push(curr);
+			primary.pop();
+		}
+		int i = 0;
+		while (!Pb60.isEmpty() && i < 3)
+		{
+			Patient* curr = new Patient(Pb60.peak()->name, Pb60.peak()->age, Pb60.peak()->priority, Pb60.peak()->condition);
+			if (curr->condition == 2)
+				primary.push(curr);
+			else
+				break;
+			Pb60.pop();
+			i++;
+		}
+		while (!Pa60.isEmpty())
+		{
+			Patient* curr = new Patient(Pa60.peak()->name, Pa60.peak()->age, Pa60.peak()->priority, Pa60.peak()->condition);
+			primary.push(curr);
+			Pa60.pop();
+		}
+		while (!Pb60.isEmpty())
+		{
+			Patient* curr = new Patient(Pb60.peak()->name, Pb60.peak()->age, Pb60.peak()->priority, Pb60.peak()->condition);
+			primary.push(curr);
+			Pb60.pop();
+		}
+	}
+	void show()
+	{
+		PatientQueue temp;
+		int i = 1;
+		cout << "TNo.\t\tCondition\tAge\t\tPriority\tName\n";
+		while (!primary.isEmpty())
+		{
+			Patient* curr = new Patient(primary.peak()->name, primary.peak()->age, primary.peak()->priority, primary.peak()->condition);
+			cout << i++ << "\t\t" << curr->condition << "\t\t" << curr->age << "\t\t" << curr->priority << "\t\t" << curr->name << endl;
+			temp.push(curr);
+			primary.pop();
+		}
+		primary = temp;
+	}
+	void view(int k)
+	{
+		PatientQueue temp;
+		int i = 1;
+		cout << "TNo.\t\tCondition\tAge\t\tPriority\tName\n";
+		while (!primary.isEmpty())
+		{
+			Patient* curr = new Patient(primary.peak()->name, primary.peak()->age, primary.peak()->priority, primary.peak()->condition);
+			if (i == k)
+				cout << i << "\t\t" << curr->condition << "\t\t" << curr->age << "\t\t" << curr->priority << "\t\t" << curr->name << endl;
+			i++;
+			temp.push(curr);
+			primary.pop();
+		}
+		primary = temp;
+	}
+public:
+	QueueManager()
+	{
+	}
+	void read_csv(const string& filename)
+	{
+		ifstream file(filename);
+		if (!file.is_open())
+		{
+			cerr << "Error: Could not open file " << filename << endl;
+			return;
+		}
+
+		string line;
+		while (getline(file, line))
+		{
+			try
+			{
+				istringstream ss(line);
+				string name;
+				int age, condition;
+				int hasReference;
+
+				if (getline(ss, name, ',') &&
+					(ss >> age) &&
+					(ss.ignore(1, ',') && (ss >> hasReference) &&
+						ss.ignore(1, ',') && (ss >> condition)))
+				{
+					Patient* newPatient = new Patient(name, age, static_cast<Priority>(hasReference), static_cast<Condition>(condition));
+					push(newPatient);
+				}
+			}
+			catch (...)
+			{
+				cerr << "Exception Handled: Entry Droppped\n";
+			}
+		}
+		file.close();
+	}
+	void run()
+	{
+		while (true)
+		{
+			try
+			{
+				system("cls");
+				cout << "Patient Record System Menu:" << endl;
+				cout << "1. Add Patient" << endl;
+				cout << "2. Deal with First Patient" << endl;
+				cout << "3. Reset System" << endl;
+				cout << "4. Update Record" << endl;
+				cout << "5. Show Complete Record" << endl;
+				cout << "6. View Patient at Position" << endl;
+				cout << "7. Exit" << endl;
+				int choice;
+				cout << "Enter your choice: ";
+				cin >> choice;
+
+				switch (choice)
+				{
+				case 1:
+				{
+					string name;
+					int age;
+					int condition;
+					bool hasReference;
+					cout << "Enter patient name ('space' --> '_'): ";
+					cin.ignore();
+					getline(cin, name);
+					cout << "Is this patient a reference? (1 - Yes, 0 - No): ";
+					int isReference;
+					cin >> isReference;
+					if (isReference != 0 && isReference != 1)
+						throw invalid_argument("Invalid input for reference.");
+					hasReference = (isReference == 1);
+					cout << "Enter patient age: ";
+					cin >> age;
+					if (age <= 0 || age >= 100)
+						throw invalid_argument("Invalid input for age.");
+					cout << "Enter condition (0 - Normal, 1 - Critical, 2 - Intense): ";
+					cin >> condition;
+					if (condition < 0 || condition > 2)
+						throw invalid_argument("Invalid input for condition.");
+					Priority P;
+					if (age > 60)
+						P = (hasReference) ? RefSen : NRefSen;
+					else
+						P = (hasReference) ? RefNSen : NRefNSen;
+					Patient* newPatient = new Patient(name, age, P, static_cast<Condition>(condition));
+					push(newPatient);
+					break;
+				}
+				case 2:
+					if (!primary.isEmpty())
+					{
+						view(1);
+						primary.pop();
+					}
+					else
+						cout << "Queue is empty. No patient to deal with." << endl;
+					break;
+				case 3:
+					while (!primary.isEmpty())
+						primary.pop();
+					cout << "System has been reset." << endl;
+					break;
+				case 4:
+				{
+					string name;
+					int condition;
+					cout << "Enter patient name for update: ";
+					cin.ignore();
+					getline(cin, name);
+					cout << "Enter updated condition (0 - Normal, 1 - Critical, 2 - Intense): ";
+					cin >> condition;
+					if (condition < 0 || condition > 2)
+						throw invalid_argument("Invalid input for condition.");
+					Patient* P = primary.update(name, static_cast<Condition>(condition));
+					if (P != nullptr)
+						push(P);
+					else
+						throw invalid_argument("Entry not Found");
+
+					break;
+				}
+				case 5:
+					show();
+					break;
+				case 6:
+				{
+					int position;
+					cout << "Enter the position of the patient to view: ";
+					cin >> position;
+					if (position >= 0)
+						view(position);
+					else
+						cout << "Invalid position." << endl;
+					break;
+				}
+				case 7:
+					cout << "Exiting the program." << endl;
+					return;
+				default:
+					cout << "Invalid choice. Please choose a valid option." << endl;
+				}
+			}
+			catch (const exception& e)
+			{
+				cerr << "Exception: " << e.what() << endl;
+			}
+			catch (...)
+			{
+				cerr << "An unknown exception occurred." << endl;
+			}
+			_getch();
+		}
+	}
+	~QueueManager()
+	{
+	}
+
+};
+
+int main()
+{
+	QueueManager Hospital1;
+	Hospital1.read_csv("pat_data.csv");
+	Hospital1.run();
+
+	return 0;
+}

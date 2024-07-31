@@ -1,0 +1,177 @@
+#include <iostream>
+using namespace std;
+
+class IntHashTable;
+class IntHashItem
+{
+    friend class IntHashTable;
+
+private:
+    int key;
+    int value;
+    int status;
+
+    IntHashItem()
+    {
+        status = 0;
+    }
+
+    ~IntHashItem()
+    {
+    }
+};
+
+class IntHashTable
+{
+private:
+    IntHashItem* hashArray;
+    int capacity;
+    int currentElements;
+    int getNextCandidateIndex(int key, int i)
+    {
+        return (key + i) % capacity;
+    }
+    void doubleCapacity()
+    {
+        IntHashItem* temp = hashArray;
+        int tempCapacity = capacity;
+
+        capacity *= 2;
+        hashArray = new IntHashItem[capacity];
+        currentElements = 0;
+
+        for (int i = 0; i < tempCapacity; i++)
+        {
+            if (temp[i].status == 1)
+            {
+                int tempKey = temp[i].key;
+                int tempValue = temp[i].value;
+
+                int index = getNextCandidateIndex(tempKey, 0);
+                while (hashArray[index].status != 0)
+                    index = getNextCandidateIndex(tempKey, index + 1);
+
+                hashArray[index].key = tempKey;
+                hashArray[index].value = tempValue;
+                hashArray[index].status = 1;
+                currentElements++;
+            }
+        }
+
+        delete[] temp;
+    }
+public:
+    IntHashTable()
+    {
+        hashArray = new IntHashItem[10];
+        capacity = 10;
+        currentElements = 0;
+    }
+    IntHashTable(int capacity)
+    {
+        if (capacity < 1)
+        {
+            cout << "Capacity cannot be less than 1\n";
+            capacity = 10;
+            return;
+        }
+
+        hashArray = new IntHashItem[capacity];
+        this->capacity = capacity;
+        currentElements = 0;
+    }
+    void insert(int key, int value)
+    {
+        if (currentElements >= (capacity * 0.75))
+            doubleCapacity();
+
+        int index = getNextCandidateIndex(key, 0);
+
+        while (hashArray[index].status == 1)
+        {
+            if (hashArray[index].key == key)
+            {
+                hashArray[index].value = value;
+                return;
+            }
+
+            index = getNextCandidateIndex(key, index + 1);
+        }
+
+        hashArray[index].key = key;
+        hashArray[index].value = value;
+        hashArray[index].status = 1;
+        currentElements++;
+    }
+    bool deleteKey(int key)
+    {
+        int index = getNextCandidateIndex(key, 0);
+
+        while (hashArray[index].status != 0)
+        {
+            if (hashArray[index].key == key && hashArray[index].status == 1)
+            {
+                hashArray[index].status = -1;
+                currentElements--;
+                return true;
+            }
+
+            index = getNextCandidateIndex(key, index + 1);
+        }
+
+        return false;
+    }
+    int get(int key)
+    {
+        if (currentElements == 0)
+            return -1; // Not Found
+
+        int index = getNextCandidateIndex(key, 0);
+
+        while (hashArray[index].status == 1)
+        {
+            if (hashArray[index].key == key && hashArray[index].status == 1)
+            {
+                return hashArray[index].value;
+            }
+
+            index = getNextCandidateIndex(key, index + 1);
+        }
+
+        return -1; // Not Found
+    }
+    ~IntHashTable()
+    {
+        delete[] hashArray;
+    }
+};
+
+int main()
+{
+    IntHashTable intHashTable(5);
+    intHashTable.insert(101, 10);
+    intHashTable.insert(201, 20);
+    intHashTable.insert(301, 30);
+    intHashTable.insert(401, 40);
+    intHashTable.insert(501, 50);
+
+    int value = intHashTable.get(201);
+    if (value != -1)
+        cout << "Value at key 201: " << value << endl;
+    else
+        cout << "Not Found" << endl;
+
+    bool deleted = intHashTable.deleteKey(301);
+    if (deleted)
+        cout << "Key 301 deleted successfully." << endl;
+    else
+        cout << "Key 301 not found!" << endl;
+
+    value = intHashTable.get(301);
+    if (value != -1)
+        cout << "Value at key 301: " << value << endl;
+    else
+        cout << "Not Found" << endl;
+
+    return 0;
+}

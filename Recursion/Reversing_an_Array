@@ -1,0 +1,26 @@
+#include <iostream>
+using namespace std;
+
+void reverseArray(int* arr, int start, int end)
+{
+	if (start >= end)
+		return;
+	swap(arr[start], arr[end]);
+	reverseArray(arr, start + 1, end - 1);
+}
+
+int main()
+{
+  	int arr[10] = { 1, 2, 3, 4, 5, 6, 7 ,8, 8, 10 };
+ 	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+	reverseArray(arr, 0, 9);
+	cout << "Reverse of Array: \n";
+	cout << '[';
+	for (int i = 0; i < 10; i++)
+		cout << arr[i] << ' ';
+	cout << ']' << endl;
+	cout << endl;
+	cout << "---------------------------\n";
+	cout << "---------------------------\n"; 
+}

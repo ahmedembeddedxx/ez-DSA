@@ -1,0 +1,155 @@
+#include<iostream>
+using namespace std;
+class StudentMaxHeap;
+
+
+
+class Student{
+	friend class StudentMaxHeap;
+private:
+	int rollNo;
+	double cgpa;
+public:
+	double getCGPA()
+	{
+		return cgpa;
+	}		
+};
+
+class StudentMaxHeap{
+	private:
+	Student* st;
+	int currSize;
+	int maxSize;
+    void heapifyUp(int index)
+	{
+		if(index>0)
+		{
+			int parentIndex=(index-1)/2;
+			if(st[index].cgpa>st[parentIndex].cgpa||(st[index].cgpa==st[parentIndex].cgpa&&st[index].rollNo<st[parentIndex].rollNo))
+			{
+				swap(st[index],st[parentIndex]);
+				heapifyUp(parentIndex);
+			}
+		}
+	}
+    void heapifyDown(int index)
+	{
+		int leftChild=2*index+1;
+		int rightChild=2*index+2;
+		int largest=index;
+		if(leftChild<currSize&&(st[leftChild].cgpa>st[largest].cgpa||(st[leftChild].cgpa==st[largest].cgpa&&st[leftChild].rollNo<st[largest].rollNo)))
+		{
+			largest=leftChild;
+		}
+		if(rightChild<currSize&&(st[rightChild].cgpa>st[largest].cgpa||(st[rightChild].cgpa==st[largest].cgpa&&st[rightChild].rollNo<st[largest].rollNo)))
+		{		
+			largest=rightChild;
+		}
+		if(largest!=index)
+		{
+			swap(st[index],st[largest]);
+			heapifyDown(largest);
+		}
+	}
+public:
+	StudentMaxHeap(int size)
+	{
+		cout<<"Constructor Called\n";
+		cout<<"Heap of "<<size<<" made\n";
+		
+		st=new Student[size];
+		currSize=0;
+		maxSize=size;
+	}
+    ~StudentMaxHeap()
+    {
+    	cout<<"Destructor Called\n";
+		delete[]st;
+	}
+    bool insert(int rollNo,double cgpa)
+	{
+		if(isFull())
+		{
+			cout<<"Heap is full.Cannot insert more students."<<endl;
+			return false;
+		}
+		Student newStudent;
+		newStudent.rollNo=rollNo;
+		newStudent.cgpa=cgpa;
+		st[currSize]=newStudent;
+		currSize++;
+		heapifyUp(currSize-1);
+		cout<<"Student Roll "<<rollNo<<" and "<<cgpa<<" CGPA has been added."<<endl;
+		return true;
+	}
+	void printHeap(int i=0)
+	{
+		if(i==0)
+		{	
+			cout<<"Array Heapified.\n";
+			cout<<"Print Heap Called.\n";
+			cout<<"Roll.\tCGPA\n";
+		}
+		if(i==currSize)
+			return;
+	
+		cout<< st[i].rollNo<<"\t"<<st[i].cgpa <<' '<<endl;
+		printHeap(i+1);
+	}
+    void removeBestStudentHelper(int index,int & roll,double & cgpa)
+	{
+		cout<<"RemoveBestStudent Called.\n";
+		if(index>=currSize)
+		{
+			cout<<"Heap is empty.Cannot remove a student."<<endl;
+			return;
+		}
+		roll=st[index].rollNo;
+		cgpa=st[index].cgpa;
+		st[index]=st[currSize-1];
+		currSize--;
+		heapifyDown(index);
+		cout<<"Student Roll "<<roll<<" and "<<cgpa<<" CGPA has been removed."<<endl;
+	}
+    void removeBestStudent(int& roll,double& cgpa)
+	{
+		removeBestStudentHelper(0,roll,cgpa);
+	}
+    bool isEmpty()
+	{
+		return(currSize==0);
+	}
+    bool isFull()
+	{
+		return(currSize>=(maxSize));
+	}
+};
+
+
+
+int main(){
+	cout<<"-----------------------------------\n";
+	StudentMaxHeap s(6);
+	cout<<"IsEmpty: "<<s.isEmpty()<<endl;;
+	cout<<"IsFull: "<<s.isFull()<<endl;
+	cout<<"-----------------------------------\n";
+	s.insert(9, 2.35);
+	s.insert(3, 2.38);
+	s.insert(4, 3.25);
+	s.insert(2, 3.56);
+	s.insert(7, 2.77);
+	s.insert(1, 3.24);
+	s.insert(25, 3.15);
+	cout<<"-----------------------------------\n";
+	int roll = 2;
+	double cgpa = 3.56;
+	s.removeBestStudent(roll, cgpa);
+	s.removeBestStudent(roll, cgpa);
+	cout<<"-----------------------------------\n";
+	s.printHeap();
+	cout<<"-----------------------------------\n";
+	
+				
+	return 0;
+}

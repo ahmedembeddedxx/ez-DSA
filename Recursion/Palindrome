@@ -1,0 +1,36 @@
+#include <iostream>
+using namespace std;
+
+
+bool isPalindrome(const std::string& str, int start, int end) {
+	if (start >= end) {
+		return true;
+	}
+	if (str[start] == str[end]) {
+		return isPalindrome(str, start + 1, end - 1);
+	}
+	return false;
+}
+
+int main()
+{
+	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+
+	string str3 = "madam";
+	cout << str3 << endl;
+	if (isPalindrome(str3, 0, 4))
+		cout << "The string is Palinndrome." << endl;
+	else
+		cout << "The string is not Palinndrome." << endl;
+
+	string str4 = "Pakistan";
+	cout << str4 << endl;
+	if (isPalindrome(str4, 0, 7))
+		cout << "The string is Palinndrome." << endl;
+	else
+		cout << "The string is not Palinndrome." << endl;
+
+	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+}

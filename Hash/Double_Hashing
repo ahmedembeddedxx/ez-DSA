@@ -1,0 +1,65 @@
+#include <iostream>
+using namespace std;
+
+
+class INT
+{
+public:
+	int status; //1 Alive, 0 Dead, -1 Gender Fluid
+	int data; 
+	int key; //Hashed Position
+	INT(int data)
+	{
+		this->data = data;
+		status = -1;
+		key = 0;
+	}
+	INT()
+	{
+		data = 0;
+		status = 0;
+		key = 0;
+	}
+};
+
+int Hash(int k, int size, int i = 0)
+{
+	int u = 8;
+	return (k % size + (i * (u - k % u))) % size;
+}
+void Hashit(INT*& arr, int m, int size)
+{
+	INT k(m);
+	int i = 0;
+	while (k.status == -1)
+	{
+		if (arr[Hash(k.data, size, i)].status != 1)
+		{
+			arr[Hash(k.data, size, i)] = k;
+			arr[Hash(k.data, size, i)].status = 1;
+			arr[Hash(k.data, size, i)].key = Hash(k.data, size, i);
+			break;
+		}
+		i++;
+	}
+}
+void showHash(INT* arr, int size)
+{
+	for (int i = 0; i < size; i++)
+		cout << (arr + i)->data << ' ';
+}
+
+
+int main()
+{
+	const int size = 5;
+	INT* arr = new INT[size];
+
+	Hashit(arr, 5, size);
+	Hashit(arr, 6, size);
+	Hashit(arr, 6, size);
+
+	showHash(arr, size);
+
+
+}

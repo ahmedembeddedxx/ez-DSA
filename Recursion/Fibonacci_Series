@@ -1,0 +1,23 @@
+#include <iostream>
+using namespace std;
+
+int fib(int a)
+{
+	if (a <= 0)
+		return 0;
+	if (a <= 1)
+		return a;
+	return (fib(a - 1) + fib(a - 2)) + 1;
+}
+
+int main()
+{
+	cout << "---------------------------\n";
+
+	cout << "---------------------------\n";
+	cout << "Sum of Fibonacci Sequence till 8th term: " << fib(8) << endl;
+	cout << "Sum of Fibonacci Sequence till 4th term: " << fib(4) << endl;
+	cout << "---------------------------\n";
+	cout << "---------------------------\n";
+
+}
